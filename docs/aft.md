@@ -3,7 +3,7 @@ https://arxiv.org/pdf/2105.14103.pdf
 
 aft là một biến thể hiệu quả của tfm nhờ loại bỏ nhân ma trận trong self-attn. Trong tầng aft, key và value được kết hợp với một tập các position bias huấn luyện được, kết quả sau đó được nhân với query element-wise. aft giữ được sự tương tác giữa 2 điểm bất kỳ trong context, đó cũng là thế mạnh của self-attn.
 
-Với mult-head attn, với mỗi head i `f_i(X) = sigma(Q_i K_i^T / sqrt(d_k)) V_i` với X thuộc R^{T * d}, Q_i, K_i, V_i = X W_i^QKV với 
+Với mult-head attn, với mỗi head i `f_i(X) = softmax(Q_i K_i^T / sqrt(d_k)) V_i` với X thuộc R^{T * d}, Q_i, K_i, V_i = X W_i^QKV với 
 W_i^QKV thuộc R^{d x (d_k + d_k + d_v)}, d_k và d_v là chiều của key và value. MHA ghép nối đầu ra của h attn heads dọc theo chiều của channel, và được kết quả là một vector đặc trưng có chiều `h d_v`. Ta có thể giả thiết d_k = d_v và h = d / d_k: có nghĩa là K,Q,V có cùng số chiều và chiều của đầu ra bằng chiều của đầu vào.
 
 aft cũng chuyển hóa tuyến tính X thành Q,K,V = X W, và sau đó thực hiện: Y = f(X) với
