@@ -25,3 +25,6 @@ I have same kind of thinking when finding a better way to tokenize Vietnamese te
 
 Quay trở lại ví dụ trên, dùng symato, sym "nguoi" xuất hiện 15 lần, nghĩa là nó được tập trung biểu diễn, còn các biến thể của nó cũng chỉ gom lại còn là 02 marktones: là f, và wf. Như vậy số lượng tokens giảm đi đáng kể, tập trung biểu diễn cho sym "nguoi" => giúp mô hình chịu lỗi cao hơn và tiết kiệm tài nguyên.
 
+- - -
+
+![](files/tknz-01.jpg)

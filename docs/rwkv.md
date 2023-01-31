@@ -52,7 +52,7 @@ Hoặc thử [Discord chatbot](https://discord.com/invite/bDSBUMeFpc)
 ![](files/rwkv-03.png)
 
 ## RWKV: Receptance Weighted Key-Value
-> RWKV là tên 4 tham số quan trọng nhất của mô hình
+> Đây là fan đặt tên, với Peng Bo RWKV là tên 4 tham số quan trọng nhất của mô hình
 
 - `r`__receptance__: "sự rung lắc trên từng đơn vị lực tác động". R-gate đóng vai trò quan trọng, nó quyết định sức mạnh thông tin của token có được áp dụng vào vị trí đang xem xét hay không.
 - `w` __weighted__: có nghĩa là weighted sum avg của values. W còn là tên của tham số đại diện cho "time decay curves" riêng biệt cho từng channel (nó giống một chút với [ALiBi position embedding](./pose.md) và có thể huấn luyện được)

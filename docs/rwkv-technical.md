@@ -26,7 +26,7 @@ R,K,V là các ma trận trọng số (có thể huấn luyện được), W là
 - với rwkv, đóng góp của F[t] vào F[t+1] cân đo bằng `sigma(R_x[t]) . exp(W.(t-i)).exp(K F[i])`
 - `sigma` là hàm phi tuyến tính và ở đây chúng ta dùng hàm sigmoid
 - Lưu ý `sigma(R x[t])` không phải là mẫu số mà ta gọi R là "receptance" (sự rung lắc trên từng đơn vị lực tác động)
-- `exp(W.(t-i))` là hệ số phân rã theo thời gian (của từng channel). Ý tưởng này giống như scaling the attention by distance được Peng Bo đề xuất 2020 được gọi là [time-weighting](#time-weighting-trick)
+- `exp(W.(t-i))` là hệ số phân rã theo thời gian (của từng channel). Ý tưởng này giống như scaling the attention by distance Peng Bo đề xuất được gọi là [time-weighting](./#time-weighting-trick)
 
 ## Punchline
 Ta có thể viết lại công thức gpt ở trên thành rnn (công thức hồi quy):
@@ -42,17 +42,17 @@ rwkv tập hợp thông tin vào các kênh (token là vector, mỗi scalar valu
 
 rwkv có thể song song hóa được là nhờ hệ số phân ra theo thời gian của từng kênh là độc lập với với dữ liệu, và hệ số này có thể huấn luyện được. Ví dụ, với rnn thông thường bạn có thể điều chỉnh hệ số phân rã của một kênh từ 0.8 xuống 0.5 (chúng được gọi là gates - cổng), trong khi đó rwkv đơn giản là chuyển thông tin từ kênh W-0.8 vào kênh W-0.5 để đạt được hiệu ứng tương tự. Hơn thế nữa bạn có thể tinh chỉnh (fine-tune) rwkv thành rnn không song song nếu bạn muốn hiệu năng cao hơn.
 
-RWKV is inspired by [Apple's AFT](https://arxiv.org/abs/2105.14103).
+RWKV is inspired by [Apple's AFT](./aft.md).
 
 Moreover it's using a number of my tricks, such as:
 
-* [__SmallInitEmb__](https://github.com/BlinkDL/SmallInitEmb): (applicable to all transformers) which helps the embedding quality, and stabilizes Post-LN (which is what I am using).
+* [__SmallInitEmb__](./#smallinitemb-trick): (applicable to all transformers) which helps the embedding quality, and stabilizes Post-LN (which is what I am using).
 
-* [__Token-shift__](https://github.com/BlinkDL/RWKV-LM#token-shift-time-shift-mixing): (applicable to all transformers), especially helpful for char-level models.
+* [__Token-shift__](./token-shift.md): (applicable to all transformers), especially helpful for char-level models.
 
 * [__Head-QK__](https://github.com/BlinkDL/RWKV-LM#the-head-qk-trick-learning-to-copy-and-avoid-tokens): (applicable to all transformers). Note: it's helpful, but I disabled it in the Pile model to keep it 100% RNN.
 
-* __Extra R-gate in the FFN__ (applicable to all transformers). I am also using reluSquared from Primer.
+* __Extra R-gate in the FFN__ (applicable to all transformers). I am also using reluSquared from Primer. (Note: đây là một trong những lý do tại sao Q trong AFN được đổi thành R trong rwkv)
 
 * [__Better initilization__](https://github.com/BlinkDL/RWKV-LM/blob/main/RWKV-v2-RNN/src/model.py): I init most of the matrices to ZERO.
 
@@ -176,7 +176,7 @@ x = x + self.ffn_n(self.ln_ffn_n(x))
 x = self.ln_head(x) # final LN before projection
 x = self.head(x)    # output: x = logits
 ```
-- Việc khởi tạo trọng số embedding siêu nhỏ là rất quan trọng, ví dụ `nn.init.uniform_(a=-1e-4,b=1e-4)` để có thể sử dụng [SmallInitEmb trick](#smallinitemb-trick).
+- Việc khởi tạo trọng số embedding siêu nhỏ là rất quan trọng, ví dụ `nn.init.uniform_(a=-1e-4,b=1e-4)` để có thể sử dụng [SmallInitEmb trick](./#smallinitemb-trick).
 - Với mô hình 1.5B rwkv-3, Peng Bo sử dụng Adam (no weigh-decay, no dropout) trên 8 * A100 40G
 - batch_size = 32 * 896, ctx_len = 896, vì sử dụng tf32 nên batch_size trở nên nhỏ hơn
 - Với 15B tokens đầu tiên, learning_rate is fixed at 3e-4, và beta=(0.9,0.99)
