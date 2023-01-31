@@ -1,10 +1,16 @@
 TODOs
 
 - [x] Tìm cách tokenize hợp với tiếng việt => xem [symato](#symato)
-- [x] Đọc hiểu RWKV => [xem rwkv.md](./docs/rwkv.md)
-- [ ] Viết lại RWKV inference engine
-- [ ] Đọc hiểu và thử tối ưu WKV-Cuda
-- [ ] RWKV vs NanoGPT với âm tiết tiếng Việt
+- [x] Đọc hiểu rwkv => [xem rwkv.md](./docs/rwkv.md)
+- [ ] Hiểu các tricks quan trọng trong rwkv
+  - [x] Hiểu [rwkv token-shift + time mix factors](./docs/token-shift.md#token-shift-time-shift-mixing)
+  - [ ] Hiểu code [Token shift GPT](./docs/token-shift.md#token-shift-gpt) (take token-shift to extreme)
+  - [ ] Hiểu rwkv-4b [tiny-attn](./docs/tiny-attn.md)
+  - [ ] Tại sao [công thức hồi quy rwkv-4](./docs/wkv-cuda.md#tai-sao-lai-dung-cong-thuc-moi) lại khác đi?
+  - [ ] Đọc hiểu và thử tối ưu [wkv-cuda](./docs/wkv-cuda.md)
+- [ ] Viết lại rwkv infer / decode engine
+- [ ] Viết lại rwkv training engine 
+- [ ] rwkv vs nanogpt với dataset âm tiết tiếng Việt
 
 - - -
 

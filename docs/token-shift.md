@@ -6,6 +6,8 @@ token x-1: [b_0, b_1, b_2, ..., b_{n-3}, b_{n-2}, b_{n-1}]
 =>         [a_0, b_1, a_2, ..., b_{n-3}, b_{n-2}, b_{n-1}]
 ```
 
+# Token-shift time-sift mixing
+
 https://github.com/BlinkDL/RWKV-LM#token-shift-time-shift-mixing
 
 Token-shift (rwkv đời đầu) sử dụng một nửa số channels của token đang xét và một nửa channel của token trước để tạo ra tất cả các vectors (QKV, RWKV, ...)
@@ -26,7 +28,7 @@ Bạn có thể sử dụng token-shift bên trong QKV self-attn thông thườn
 
 - - -
 
-Sau đó, rwkv-4 nâng cấp lên vector hệ số riêng có thể huấn luyện được cho k,v,r. Xem code: 
+Sau đó, rwkv-4 nâng cấp cách trộn x và xx thành vector hệ số trộn có thể huấn luyện được cho k,v,r. Xem code: 
 ```py
 attn_sz = n_embd = 8
 inits = torch.zeros(1, 1, n_embd) # shape = (1, 1, n_embed) để khớp với 3 chiều dữ liệu đầu vào là (B, T, C)
@@ -79,7 +81,7 @@ return output(rwkv)
 ```
 
 
-
+# Token shift GPT
 Phi Wang https://github.com/lucidrains/token-shift-gpt
 
 An autoregressive model that relies solely on __shifting along the sequence dimension__ and __feedforwards__.
