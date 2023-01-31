@@ -60,6 +60,29 @@ Moreover it's using a number of my tricks, such as:
 
 * [__CUDA kernel__](https://github.com/BlinkDL/RWKV-LM/tree/main/RWKV-v4neo/cuda) to speedup training.
 
+Basically the model learns to focus more on short-distance interactions in early layers, and long-distance interactions in later layers (xem thêm [ở đây](https://www.reddit.com/r/MachineLearning/comments/umq908/r_rwkvv2rnn_a_parallelizable_rnn_with))
+![](files/rwkv-07.jpg)
+
+https://www.reddit.com/r/MachineLearning/comments/umq908/r_rwkvv2rnn_a_parallelizable_rnn_with
+
+- `bo_peng`: The actual story is I spent months playing around with RWKV v1 (it's quite capable) and suddenly realized it can be rewritten as a RNN after some simplifications. I had never used RNN in my life before that lol because I had thought it could not compete with transformers.
+- `gwern`: You can train them all at <1b. If it has similar to Transformer scaling, the RNN scaling curves already start bending [somewhere around 0.01b](https://www.gwern.net/images/ai/gpt/2020-kaplan-figure7-rnnsvstransformers.png) and should be easily distinguishable far before 20b models.
+- `bo_peng`: It might actually scale better (!) than the usual transformer for LM. I find the L24-D1024 RWKV-2 converges better than the L12-D768 version judging from their LAMBADA performances vs the similar-sized GPT-Neo models.
+- My gut feeling is, while the usual quadratic MHA has more representation capability, it can also be confusing for the optimizer so the trained models are not fully utilizing MHA (has a low rank, etc.)
+- In RWKV-2, the selfAtt is replaced by a number of explicit "time-decay curves" (x, 1, w, w^2, w^3, ...) per channel (a bit like a trainable ALiBi positional encoding), together with K and R.
+
+- `gwern`: That is possible but per ddofer, I would be surprised if it had a better exponent and didn't simply have a better inductive bias which will wash out with scale (and this is why you fit scaling laws).
+- `bo_peng`: Yeah hence we need to test larger models, although L24-D1024 is already a decent size. Note 1.3B = L24-D2048.
+- I have a theory that the secret of transformer lies in the FFN (as a key-value storage https://arxiv.org/abs/2012.14913 ) once you have a reasonable SA-like mechanism, and that's why MoE models can do a great job. The extra parameters of RWKV-2 are in the FFN too (an extra R gate).
+
+- `ddofer`: Based on ULMFit, the cnn text pretraining paper and our own ProteinBERT, I'd expect it to do better with less data. LSTMs have better inductive bias for this.
+- `bo_peng`: Well it's converging faster so that's like "do better with less data" :)
+- `ddofer`: Smaller models or with less bias also converge faster. And saturate faster. e.g. W2V.
+- `bo_peng`: AFAIK the current performance is already beyond all RNN variations and it's not plateauing yet.
+
+- Can someone ELI15 this for me? I am absolutely lost how this is accomplished, starting from the Head-QK trick :(
+- `bo_peng`: The Head-QK trick is not used in the Pile model (for simplicity).
+
 ## rwkv-2
 - Là RNN nhưng có thể được huấn luyện như GPT transformer
 - Chỉ cần {x_t, a_t, b_t} của vị trí t để tính ra vector của t+1

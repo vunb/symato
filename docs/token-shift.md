@@ -22,7 +22,7 @@ Giả thiết của Peng Bo về hiệu quả của token-shift là: khi huấn 
 1. Dự đoán token tiếp theo. Đôi khi nó rất dễ (obvious next token)
 2. Thu thập tất cả thông tin ngữ cảnh trước đó, để các tokens phía sau có thể sử dụng. Điều này luôn khó!
 
-Các kênh được dịch chuyển (shifted channels) có thể tập trung vào (2), và vì thế chúng ta có sự lan truyền thông tin tốt. __Nó giống nuhw residual connection hoặc một rnn nhỏ bên trong tfm__.
+Các kênh được dịch chuyển (shifted channels) có thể tập trung vào (2), và vì thế chúng ta có sự lan truyền thông tin tốt. __Nó giống như residual connection hoặc một rnn nhỏ bên trong tfm__.
 
 Bạn có thể sử dụng token-shift bên trong QKV self-attn thông thường. Peng Bo xem xét các trọng số, và thấy __V thực sự giống như shifted channels__. Make sense if you think about it (??). Peng Bo cũng nhận ra rằng nên dùng ít mixing hơn ở những tầng sâu hơn (I also found you may want to use less mixing in higher layers).
 
@@ -80,13 +80,17 @@ rwkv = torch.sigmoid(r) * WKV.apply(B, T, C, time_decay, time_first, k, v) # WKV
 return output(rwkv)
 ```
 
+![](files/token-shift-00.jpg)
+Peng Bo nói rằng khi tỉ lệ vocab_size / emb_size cao thì không cần "more-shift", và more-shift có tác dụng hơn với char-level LM. Điều đó có nghĩa là:
+- `vocab_size / emb_size` cao thì nhiều khả năng token dài được sử dụng, như vậy một token chứa nhiều thông tin và thông tin "trọn vẹn" (1 từ hoàn chỉnh) hơn là nhiều char tokens. Với char tokens thì more tokens mới tạo được một từ vì thế cần dùng more-shift?
+`vocab_size / emb_size` cao cũng có nghĩa là ctx_len dài hơn được sử dụng, khi đó more-shift sẽ giúp mối liên hệ giữa các tokens xa nhau tốt hơn?
 
 # Token shift GPT
 Phi Wang https://github.com/lucidrains/token-shift-gpt
 
 An autoregressive model that relies solely on __shifting along the sequence dimension__ and __feedforwards__.
 
-Không thể giải thích được nhưng nó hoạt động khá tốt. Module feedforward có thiết kế giống gMLP, ngoại trừ kích thước feature của gate tensor được chia thành các đoạn log_2(seq_len) và mean pool của các phân đoạn liên tiếp trước đó (độ dài 1,2,4,8 ... vào quá khứ) được shifted vào thành từng đoạn trước khi project along the feature dimension.
+Không thể giải thích được nhưng nó hoạt động khá tốt. Module feedforward có thiết kế giống [gMLP](./gmlp.md), ngoại trừ kích thước feature của gate tensor được chia thành các đoạn log_2(seq_len) và mean pool của các phân đoạn liên tiếp trước đó (độ dài 1,2,4,8 ... vào quá khứ) được shifted vào thành từng đoạn trước khi project along the feature dimension.
 
 TODO: đọc hiểu code token-shift-gpt.
 
@@ -123,7 +127,7 @@ def shift_tokens(x, amt, eps = 1e-5):
         shifted_chunk = shift(x_cumsum_chunk, amt, dim = -2) - shift(x_cumsum_chunk, 2 * amt, dim = -2)
         shifted_denom = shift(denom, amt, dim = -1) - shift(denom, 2 * amt, dim = -1)
         shifted_denom = rearrange(shifted_denom, 'n -> () n ()')
-        normed_shifted_x = shifted_chunk /  (shifted_denom + eps)
+        normed_shifted_x = shifted_chunk / (shifted_denom + eps)
         shifts.append(normed_shifted_x)
 
     return torch.cat((*shifts, x_pass), dim = -1)

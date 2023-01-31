@@ -28,3 +28,8 @@ Quay trở lại ví dụ trên, dùng symato, sym "nguoi" xuất hiện 15 lầ
 - - -
 
 ![](files/tknz-01.jpg)
+
+giả thiết của tớ là mình viết ko dấu rất nhiều trường hợp vẫn đọc được nội dung, chứng tỏ hàm lượng thông tin ở sym là đậm đặc nhất, mình tập trung biểu diễn nó thật tốt trước, sau đó mới tính đến các biến thể viết hoa vs viết thường, + thêm dấu thanh (marktone):
+- "Nước Việt Nam hình chữ S => ^ nuoc ws ^ viet zj ^ nam hinh f chu wx ^ s"
+- ^ là token thể hiện sym đằng sau nó viết hoa chữ cái đầu, ws, zj, wx là các marktones giống như mình gõ telex mà bỏ dấu thanh ở cuối
+- ^ kiểu như là mình phải ấn nút shift trước khi gõ chữ cái muốn viết hoa
