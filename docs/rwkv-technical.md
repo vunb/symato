@@ -26,7 +26,7 @@ R,K,V là các ma trận trọng số (có thể huấn luyện được), W là
 - với rwkv, đóng góp của F[t] vào F[t+1] cân đo bằng `sigma(R_x[t]) . exp(W.(t-i)).exp(K F[i])`
 - `sigma` là hàm phi tuyến tính và ở đây chúng ta dùng hàm sigmoid
 - Lưu ý `sigma(R x[t])` không phải là mẫu số mà ta gọi R là "receptance" (sự rung lắc trên từng đơn vị lực tác động)
-- `exp(W.(t-i))` là hệ số phân rã theo thời gian (của từng channel). Ý tưởng này giống như scaling the attention by distance Peng Bo đề xuất được gọi là [time-weighting](./#time-weighting-trick)
+- `exp(W.(t-i))` là hệ số phân rã theo thời gian (của từng channel). Ý tưởng này giống như scaling the attention by distance Peng Bo đề xuất được gọi là [time-weighting](#time-weighting-trick)
 
 ## Punchline
 Ta có thể viết lại công thức gpt ở trên thành rnn (công thức hồi quy):
@@ -46,7 +46,7 @@ RWKV is inspired by [Apple's AFT](./aft.md).
 
 Moreover it's using a number of my tricks, such as:
 
-* [__SmallInitEmb__](./#smallinitemb-trick): (applicable to all transformers) which helps the embedding quality, and stabilizes Post-LN (which is what I am using).
+* [__SmallInitEmb__](#smallinitemb-trick): (applicable to all transformers) which helps the embedding quality, and stabilizes Post-LN (which is what I am using).
 
 * [__Token-shift__](./token-shift.md): (applicable to all transformers), especially helpful for char-level models.
 
@@ -176,7 +176,7 @@ x = x + self.ffn_n(self.ln_ffn_n(x))
 x = self.ln_head(x) # final LN before projection
 x = self.head(x)    # output: x = logits
 ```
-- Việc khởi tạo trọng số embedding siêu nhỏ là rất quan trọng, ví dụ `nn.init.uniform_(a=-1e-4,b=1e-4)` để có thể sử dụng [SmallInitEmb trick](./#smallinitemb-trick).
+- Việc khởi tạo trọng số embedding siêu nhỏ là rất quan trọng, ví dụ `nn.init.uniform_(a=-1e-4,b=1e-4)` để có thể sử dụng [SmallInitEmb trick](#smallinitemb-trick).
 - Với mô hình 1.5B rwkv-3, Peng Bo sử dụng Adam (no weigh-decay, no dropout) trên 8 * A100 40G
 - batch_size = 32 * 896, ctx_len = 896, vì sử dụng tf32 nên batch_size trở nên nhỏ hơn
 - Với 15B tokens đầu tiên, learning_rate is fixed at 3e-4, và beta=(0.9,0.99)
