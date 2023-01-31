@@ -36,3 +36,9 @@ A ToDo app is just one example of what's possible. We thought of LLMagnus Chess 
 
 - - -
 
+Dùng ChatGPT để học
+![](files/apps-04.jpg)
+
+2 câu trả lời giống hệt nhau, chứng tỏ prompt đầu vào là giống nhau.
+
+![](files/apps-05.jpg)
