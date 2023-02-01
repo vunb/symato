@@ -3,6 +3,9 @@
 # https://github.com/BlinkDL/RWKV-LM/blob/main/RWKV-v4neo/src/model_run.py
 ########################################################################################################
 
+# tham khảo https://github.com/harrisonvanderbyl/rwkvstic/blob/master/src/rwkvstic/agnostic/agnosticRwkv.py
+# hazardous1222: removing all tensor pre-prep and I assume some of the Math Blink used to try and make fp16 work
+
 import types
 import torch
 import math, os, gc
@@ -45,7 +48,8 @@ class RWKV_RNN(MyModule):
                 if 'att.output.weight' in k: w[k] = w[k] / rescale
                 if  'ffn.value.weight' in k: w[k] = w[k] / rescale
                 if      '.time_' in k: w[k] = w[k].squeeze() # (A,1,B,1) => (A,B)
-                if '.time_decay' in k: w[k] = -torch.exp(w[k].float()) # biến time_decay thành số âm
+                if '.time_decay' in k: w[k] = -torch.exp(w[k].float()) 
+                # e ^ negative = decay it's actually e ^ ( - e^ x ) biến time_decay thành số âm
                 if '.time_first' in k: w[k] = w[k].float()
                 else: # các tham số khác
                     if   self.FLOAT_MODE == "fp32": w[k] = w[k].float()
@@ -86,46 +90,55 @@ class RWKV_RNN(MyModule):
     def LN(self, x, w):
         return F.layer_norm(x, (self.args.n_embd,), weight=w.weight, bias=w.bias)
 
-    # state[] 0=ffn_xx 1=att_xx 2=att_aa 3=att_bb 4=att_pp
+    def get_prev_x(self, x, state, idx:int):
+        if self.FLOAT_MODE == "bf16":
+            prev_x = state[idx].type(torch.bfloat16)
+            state[idx] = x.float()
 
+        elif self.FLOAT_MODE == "fp16":
+            prev_x = state[idx].half()
+            state[idx] = x.float()            
+
+        else:
+            prev_x = state[idx]
+            state[idx] = x
+
+        return prev_x
+
+    # state[] i+0=ffn_xx i+1=att_xx i+2=att_aa i+3=att_bb i+4=att_pp
     @MyFunction
     def FF(self, x, state, i:int, time_mix_k, time_mix_r, kw, vw, rw):
-        if self.FLOAT_MODE == "bf16":
-            xk = x * time_mix_k + state[5*i+0].type(torch.bfloat16) * (1 - time_mix_k)
-            xr = x * time_mix_r + state[5*i+0].type(torch.bfloat16) * (1 - time_mix_r)
-            state[5*i+0] = x.float()
-        elif self.FLOAT_MODE == "fp16":
-            xk = x * time_mix_k + state[5*i+0].half() * (1 - time_mix_k)
-            xr = x * time_mix_r + state[5*i+0].half() * (1 - time_mix_r)
-            state[5*i+0] = x.float()            
-        else:
-            xk = x * time_mix_k + state[5*i+0] * (1 - time_mix_k)
-            xr = x * time_mix_r + state[5*i+0] * (1 - time_mix_r)
-            state[5*i+0] = x
+        ffn_xx = 5*i+0 # ffn = channel mixing
+        prev_x = self.get_prev_x(x, state, ffn_xx)
 
-        r = torch.sigmoid(rw @ xr)
-        k = torch.square(torch.relu(kw @ xk))
+        # token-shift with diff mixing factors for k and r
+        xk = x * time_mix_k + prev_x * (1 - time_mix_k)
+        xr = x * time_mix_r + prev_x * (1 - time_mix_r)
+        r = torch.sigmoid(rw @ xr) # receptance factor: 0 -> 1
+        k = torch.square(torch.relu(kw @ xk)) # square relu, primer paper
         kv = vw @ k
-
         return r * kv
 
+    # state[] i+0=ffn_xx i+1=att_xx i+2=att_aa i+3=att_bb i+4=att_pp
     @MyFunction
     def SA(self, x, state, i:int, time_mix_k, time_mix_v, time_mix_r, time_first, time_decay, kw, vw, rw, ow):
+        att_xx = 5*i+1 # attention or time mixing
+        # prev_x = self.get_prev_x(x, state, att_xx)
         if self.FLOAT_MODE == "bf16":
-            xk = x * time_mix_k + state[5*i+1].type(torch.bfloat16) * (1 - time_mix_k)
-            xv = x * time_mix_v + state[5*i+1].type(torch.bfloat16) * (1 - time_mix_v)
-            xr = x * time_mix_r + state[5*i+1].type(torch.bfloat16) * (1 - time_mix_r)
-            state[5*i+1] = x.float()
+            xk = x * time_mix_k + state[att_xx].type(torch.bfloat16) * (1 - time_mix_k)
+            xv = x * time_mix_v + state[att_xx].type(torch.bfloat16) * (1 - time_mix_v)
+            xr = x * time_mix_r + state[att_xx].type(torch.bfloat16) * (1 - time_mix_r)
+            state[att_xx] = x.float()
         elif self.FLOAT_MODE == "fp16":
-            xk = x * time_mix_k + state[5*i+1].half() * (1 - time_mix_k)
-            xv = x * time_mix_v + state[5*i+1].half() * (1 - time_mix_v)
-            xr = x * time_mix_r + state[5*i+1].half() * (1 - time_mix_r)
-            state[5*i+1] = x.float()            
+            xk = x * time_mix_k + state[att_xx].half() * (1 - time_mix_k)
+            xv = x * time_mix_v + state[att_xx].half() * (1 - time_mix_v)
+            xr = x * time_mix_r + state[att_xx].half() * (1 - time_mix_r)
+            state[att_xx] = x.float()            
         else:
-            xk = x * time_mix_k + state[5*i+1] * (1 - time_mix_k)
-            xv = x * time_mix_v + state[5*i+1] * (1 - time_mix_v)
-            xr = x * time_mix_r + state[5*i+1] * (1 - time_mix_r)
-            state[5*i+1] = x
+            xk = x * time_mix_k + state[att_xx] * (1 - time_mix_k)
+            xv = x * time_mix_v + state[att_xx] * (1 - time_mix_v)
+            xr = x * time_mix_r + state[att_xx] * (1 - time_mix_r)
+            state[att_xx] = x
 
         r = torch.sigmoid(rw @ xr)
         k = kw @ xk

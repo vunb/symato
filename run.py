@@ -83,8 +83,8 @@ Full Answer:
 # Bot: It’s a large and very expensive piece of science equipment. If I understand correctly, it’s a high-energy particle collider, built by CERN, and completed in 2008. They used it to confirm the existence of the Higgs boson in 2012.
 # User:''' # type your question here
 
-NUM_TRIALS = 999
-LENGTH_PER_TRIAL = 333
+NUM_TRIALS = 3
+LENGTH_PER_TRIAL = 222
 
 TEMPERATURE = 1.0
 top_p = 0.8
