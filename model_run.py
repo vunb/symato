@@ -90,30 +90,22 @@ class RWKV_RNN(MyModule):
     def LN(self, x, w):
         return F.layer_norm(x, (self.args.n_embd,), weight=w.weight, bias=w.bias)
 
-    def get_prev_x(self, x, state, idx:int):
-        if self.FLOAT_MODE == "bf16":
-            prev_x = state[idx].type(torch.bfloat16)
-            state[idx] = x.float()
-
-        elif self.FLOAT_MODE == "fp16":
-            prev_x = state[idx].half()
-            state[idx] = x.float()            
-
-        else:
-            prev_x = state[idx]
-            state[idx] = x
-
-        return prev_x
+    def get_converted_prev_x_and_xx(self, x, state, idx:int):
+        if self.FLOAT_MODE == "bf16": return state[idx].type(torch.bfloat16), x.float()
+        if self.FLOAT_MODE == "fp16": return state[idx].half(), x.float()            
+        return state[idx], x
 
     # state[] i+0=ffn_xx i+1=att_xx i+2=att_aa i+3=att_bb i+4=att_pp
     @MyFunction
     def FF(self, x, state, i:int, time_mix_k, time_mix_r, kw, vw, rw):
         ffn_xx = 5*i+0 # ffn = channel mixing
-        prev_x = self.get_prev_x(x, state, ffn_xx)
+        prev_x, xx = self.get_converted_prev_x_and_xx(x, state, ffn_xx)
 
         # token-shift with diff mixing factors for k and r
         xk = x * time_mix_k + prev_x * (1 - time_mix_k)
         xr = x * time_mix_r + prev_x * (1 - time_mix_r)
+        state[ffn_xx] = xx
+
         r = torch.sigmoid(rw @ xr) # receptance factor: 0 -> 1
         k = torch.square(torch.relu(kw @ xk)) # square relu, primer paper
         kv = vw @ k
@@ -123,22 +115,13 @@ class RWKV_RNN(MyModule):
     @MyFunction
     def SA(self, x, state, i:int, time_mix_k, time_mix_v, time_mix_r, time_first, time_decay, kw, vw, rw, ow):
         att_xx = 5*i+1 # attention or time mixing
-        # prev_x = self.get_prev_x(x, state, att_xx)
-        if self.FLOAT_MODE == "bf16":
-            xk = x * time_mix_k + state[att_xx].type(torch.bfloat16) * (1 - time_mix_k)
-            xv = x * time_mix_v + state[att_xx].type(torch.bfloat16) * (1 - time_mix_v)
-            xr = x * time_mix_r + state[att_xx].type(torch.bfloat16) * (1 - time_mix_r)
-            state[att_xx] = x.float()
-        elif self.FLOAT_MODE == "fp16":
-            xk = x * time_mix_k + state[att_xx].half() * (1 - time_mix_k)
-            xv = x * time_mix_v + state[att_xx].half() * (1 - time_mix_v)
-            xr = x * time_mix_r + state[att_xx].half() * (1 - time_mix_r)
-            state[att_xx] = x.float()            
-        else:
-            xk = x * time_mix_k + state[att_xx] * (1 - time_mix_k)
-            xv = x * time_mix_v + state[att_xx] * (1 - time_mix_v)
-            xr = x * time_mix_r + state[att_xx] * (1 - time_mix_r)
-            state[att_xx] = x
+        prev_x, xx = self.get_converted_prev_x_and_xx(x, state, att_xx)
+
+        # token-shift
+        xk = x * time_mix_k + prev_x * (1 - time_mix_k)
+        xv = x * time_mix_v + prev_x * (1 - time_mix_v)
+        xr = x * time_mix_r + prev_x * (1 - time_mix_r)
+        state[att_xx] = xx
 
         r = torch.sigmoid(rw @ xr)
         k = kw @ xk
@@ -150,29 +133,30 @@ class RWKV_RNN(MyModule):
         else:
             kk = k
             vv = v
-        aa = state[5*i+2]
-        bb = state[5*i+3]
-        pp = state[5*i+4]
-        ww = time_first + kk
-        p = torch.maximum(pp, ww)
-        e1 = torch.exp(pp - p)
-        e2 = torch.exp(ww - p)
+
+        aa = state[5*i+2] # exponential moving average of kv
+        bb = state[5*i+3] # exponential moving average of k
+        pp = state[5*i+4] # idea: use pp to store exponent of a and b
+        ww = time_first + kk # u + k_i
+
+        qq = torch.maximum(pp, ww)
+        e1 = torch.exp(pp - qq)
+        e2 = torch.exp(ww - qq)
+
         a = e1 * aa + e2 * vv
         b = e1 * bb + e2
+
         ww = pp + time_decay
-        p = torch.maximum(ww, kk)
-        e1 = torch.exp(ww - p)
-        e2 = torch.exp(kk - p)
+        qq = torch.maximum(ww, kk)
+        e1 = torch.exp(ww - qq)
+        e2 = torch.exp(kk - qq)
         state[5*i+2] = e1 * aa + e2 * vv
         state[5*i+3] = e1 * bb + e2
-        state[5*i+4] = p
-        if self.FLOAT_MODE == "bf16":
-            wkv = (a / b).type(torch.bfloat16)
-        elif self.FLOAT_MODE == "fp16":
-            wkv = (a / b).half()
-        else:
-            wkv = a / b
-        
+        state[5*i+4] = qq
+
+        wkv = a / b
+        if   self.FLOAT_MODE == "bf16": wkv = wkv.type(torch.bfloat16)
+        elif self.FLOAT_MODE == "fp16": wkv = wkv.half()
         return ow @ (r * wkv)
 
     def forward(self, ctx, state, preprocess_only = False):
@@ -187,7 +171,7 @@ class RWKV_RNN(MyModule):
                 pos_emb = w.pos_emb[len(ctx)-1]
                 x = x + pos_emb
             except:
-                pass             
+                pass
 
             if state == None:
                 state = torch.zeros(args.n_layer * 5, args.n_embd, device=self.RUN_DEVICE)

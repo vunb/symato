@@ -58,17 +58,17 @@ args.my_pos_emb = 0 # không dùng positional embedding
 # context = 'A'
 # context = "\nIn the"
 # context = '\nSugar:'
-# context = "\nIn a shocking finding, scientist discovered a herd of dragons living in a remote, previously unexplored valley, in Tibet. Even more surprising to the researchers was the fact that the dragons spoke perfect Chinese."
+context = "\nIn a shocking finding, scientist discovered a herd of dragons living in a remote, previously unexplored valley, in Tibet. Even more surprising to the researchers was the fact that the dragons spoke perfect Chinese."
 
 # ###### A good prompt for Q&A ######
-context = '''
-Questions & Helpful Answers
-Ask Research Experts
-Question:
-Can penguins fly?
+# context = '''
+# Questions & Helpful Answers
+# Ask Research Experts
+# Question:
+# Can penguins fly?
 
-Full Answer:
-'''
+# Full Answer:
+# '''
 
 # ###### A good prompt for chatbot ######
 # context = '''
