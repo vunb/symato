@@ -21,9 +21,9 @@ if  RWKV_JIT_ON == "1":
     MyFunction = torch.jit.script_method
 
 RWKV_HEAD_QK_DIM = 0
-print(f'\nRWKV_HEAD_QK_DIM {RWKV_HEAD_QK_DIM} RWKV_JIT_ON {RWKV_JIT_ON}\n')
-
-RWKV_RESCALE_LAYER = 6 # set x=x/2 every X layer
+RWKV_RESCALE_LAYER = 6
+# set x=x/2 every 6 block to prevent FP16 overflow. Peng Bo scale some weight too, so the final result is the same
+print(f'\nRWKV_HEAD_QK_DIM {RWKV_HEAD_QK_DIM} RWKV_JIT_ON {RWKV_JIT_ON} RWKV_RESCALE_LAYER {RWKV_RESCALE_LAYER}\n')
 
 ############################################################################################################
 
@@ -36,40 +36,35 @@ class RWKV_RNN(MyModule):
         self.RUN_DEVICE = args.RUN_DEVICE
 
         with torch.no_grad():
-            # w = torch.load('RWKV-4a-Pile-170M-20221209-7955.pth', map_location='cpu')
+            # Example: w = torch.load('RWKV-4a-Pile-170M-20221209-7955.pth', map_location='cpu')
             w = torch.load(args.MODEL_NAME + '.pth', map_location='cpu')
             # refine weights and send to correct device
-            keys = list(w.keys())
-            print_need_newline = False
-            for x in keys:
-                block_id = int(x.split('.')[1]) if 'blocks.' in x else 0 # xác định block_id
-                if 'att.output.weight' in x: w[x] = w[x] / (2 ** int(block_id // RWKV_RESCALE_LAYER))
-                if  'ffn.value.weight' in x: w[x] = w[x] / (2 ** int(block_id // RWKV_RESCALE_LAYER))
-                if      '.time_' in x: w[x] = w[x].squeeze()
-                if '.time_decay' in x: w[x] = -torch.exp(w[x].float())
-                if '.time_first' in x: w[x] = w[x].float()
+            for k in w.keys():
+                block_id = int(k.split('.')[1]) if 'blocks.' in k else 0 # xác định block_id
+                rescale = 2 ** int(block_id // RWKV_RESCALE_LAYER) # set x=x/2 every 6 block
+                if 'att.output.weight' in k: w[k] = w[k] / rescale
+                if  'ffn.value.weight' in k: w[k] = w[k] / rescale
+                if      '.time_' in k: w[k] = w[k].squeeze() # (A,1,B,1) => (A,B)
+                if '.time_decay' in k: w[k] = -torch.exp(w[k].float()) # biến time_decay thành số âm
+                if '.time_first' in k: w[k] = w[k].float()
                 else: # các tham số khác
-                    if   self.FLOAT_MODE == "fp32": w[x] = w[x].float()
-                    elif self.FLOAT_MODE == "bf16": w[x] = w[x].bfloat16()
-                    elif self.FLOAT_MODE == "fp16": w[x] = w[x].half()
+                    if   self.FLOAT_MODE == "fp32": w[k] = w[k].float()
+                    elif self.FLOAT_MODE == "bf16": w[k] = w[k].bfloat16()
+                    elif self.FLOAT_MODE == "fp16": w[k] = w[k].half()
 
-                w[x].requires_grad = False # chỉ inference, nên không cần gradient
-                if args.RUN_DEVICE == 'cuda' and x != 'emb.weight': w[x] = w[x].cuda() # emb lookup table stay in ram
+                w[k].requires_grad = False # chỉ inference, nên không cần gradient
+                if args.RUN_DEVICE == 'cuda' and k != 'emb.weight': 
+                    w[k] = w[k].cuda() # emb lookup table stay in ram
 
-                if ('blocks.' not in x) or ('blocks.0.' in x):
-                    if print_need_newline:
-                        print('\n', end = '')
-                        print_need_newline = False
-                    print(x.ljust(40), str(w[x].dtype).replace('torch.', '').ljust(10), w[x].device)
+                if ('blocks.' not in k) or ('blocks.0.' in k):
+                    print(k.ljust(40), str(w[k].dtype).replace('torch.', '').ljust(10), w[k].device)
                 else:
-                    print_need_newline = True
                     print('.', end = '', flush = True)
 
         # store weights in self.w
-        keys = list(w.keys())
         self.w = types.SimpleNamespace()
-        for x in keys:
-            xx = x.split('.')
+        for x in w.keys():
+            xx = x.split('.') # blocks.0.att.value.weight => ['block','0','att'...]
             here = self.w
             for i in range(len(xx)):
                 if xx[i].isdigit():
