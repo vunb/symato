@@ -1,3 +1,9 @@
+![](files/apps-13.jpg)
+
+![](files/apps-14.jpg)
+
+![](files/apps-15.jpg)
+
 https://twitter.com/swyx/status/1610247438958481408
 ChatGPT’s current killer app isn’t search, therapy, doing math, controlling browsers, emulating a virtual machine, or any of that other cherrypicked examples that come with huge disclaimers.
 

@@ -33,11 +33,14 @@ Model | 8bit | bf16/fp16 | fp32
 ```py
 # pip install rwkvstic transformers sty inquirer scipy pytorch
 from rwkvstic.load import RWKV; import torch
+# from rwkvstic.agnostic.backends import TORCH
+# file="https://huggingface.co/BlinkDL/rwkv-4-pile-169m/resolve/main/RWKV-4a-Pile-170M-20221209-7955.pth"
+# model = RWKV(file,mode=TORCH,runtimedtype=torch.float32,dtype=torch.float32,useGPU=True)
 from rwkvstic.agnostic.backends import TORCH_QUANT
 file="https://huggingface.co/BlinkDL/rwkv-4-pile-3b/resolve/main/RWKV-4-Pile-3B-20221110-ctx4096.pth"
 # file="https://huggingface.co/BlinkDL/rwkv-4-pile-7b/resolve/main/RWKV-4-Pile-7B-20230109-ctx4096.pth"
 # file="https://huggingface.co/BlinkDL/rwkv-4-pile-14b/resolve/main/RWKV-4-Pile-14B-20230115-5775.pth"
-model = RWKV(file,mode=TORCH_QUANT,runtimedtype=torch.float32,chunksize=4,useGPU=True) # target= số VRAM GPU bạn có
+model = RWKV(file,mode=TORCH_QUANT,runtimedtype=torch.float32,chunksize=4,useGPU=True)
 ELDR = "\n\nExpert Long Detailed Response: "
 # model.resetState()
 t=input("q: ");model.loadContext("\n", t+ELDR);print(model.forward(number=100)["output"])

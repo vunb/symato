@@ -4,9 +4,8 @@ TODOs
 - [x] Đọc hiểu rwkv => [xem rwkv.md](./docs/rwkv.md)
 - [ ] Hiểu các tricks quan trọng trong rwkv
   - [x] Hiểu [rwkv token-shift + time mix factors](./docs/token-shift.md#token-shift-time-shift-mixing)
-  - [ ] Hiểu rwkv-4b [tiny-attn](./docs/tiny-attn.md)
+  - [ ] Hiểu rwkv-4b [tiny-attn](./docs/tiny-attn.md), chưa có ct hồi quy cho tiny-attn?
   - [ ] Tại sao [công thức hồi quy rwkv-4](./docs/wkv-cuda.md#tai-sao-lai-dung-cong-thuc-moi) lại khác đi?
-  - [ ] Đọc hiểu và thử tối ưu [wkv-cuda](./docs/wkv-cuda.md)
 - [ ] Viết lại rwkv infer / decode engine
 - [ ] Viết lại rwkv training engine 
 - [ ] rwkv vs nanogpt với dataset âm tiết tiếng Việt
