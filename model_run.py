@@ -90,21 +90,21 @@ class RWKV_RNN(MyModule):
     def LN(self, x, w):
         return F.layer_norm(x, (self.args.n_embd,), weight=w.weight, bias=w.bias)
 
-    def get_converted_prev_x_and_xx(self, x, state, idx:int):
-        if self.FLOAT_MODE == "bf16": return state[idx].type(torch.bfloat16), x.float()
-        if self.FLOAT_MODE == "fp16": return state[idx].half(), x.float()            
-        return state[idx], x
+    def get_converted_prev_x_and_xx(self, prev_x, x):
+        if self.FLOAT_MODE == "bf16": return prev_x.type(torch.bfloat16), x.float()
+        if self.FLOAT_MODE == "fp16": return prev_x.half(), x.float()
+        return prev_x, x
 
     # state[] i+0=ffn_xx i+1=att_xx i+2=att_aa i+3=att_bb i+4=att_pp
     @MyFunction
     def FF(self, x, state, i:int, time_mix_k, time_mix_r, kw, vw, rw):
         ffn_xx = 5*i+0 # ffn = channel mixing
-        prev_x, xx = self.get_converted_prev_x_and_xx(x, state, ffn_xx)
+        prev_x, xx = self.get_converted_prev_x_and_xx(state[ffn_xx], x)
 
         # token-shift with diff mixing factors for k and r
         xk = x * time_mix_k + prev_x * (1 - time_mix_k)
         xr = x * time_mix_r + prev_x * (1 - time_mix_r)
-        state[ffn_xx] = xx
+        state[ffn_xx] = xx # prev_x = xx
 
         r = torch.sigmoid(rw @ xr) # receptance factor: 0 -> 1
         k = torch.square(torch.relu(kw @ xk)) # square relu, primer paper
@@ -115,13 +115,13 @@ class RWKV_RNN(MyModule):
     @MyFunction
     def SA(self, x, state, i:int, time_mix_k, time_mix_v, time_mix_r, time_first, time_decay, kw, vw, rw, ow):
         att_xx = 5*i+1 # attention or time mixing
-        prev_x, xx = self.get_converted_prev_x_and_xx(x, state, att_xx)
+        prev_x, xx = self.get_converted_prev_x_and_xx(state[att_xx], x)
 
         # token-shift
         xk = x * time_mix_k + prev_x * (1 - time_mix_k)
         xv = x * time_mix_v + prev_x * (1 - time_mix_v)
         xr = x * time_mix_r + prev_x * (1 - time_mix_r)
-        state[att_xx] = xx
+        state[att_xx] = xx # prev_x = xx
 
         r = torch.sigmoid(rw @ xr)
         k = kw @ xk
@@ -137,12 +137,11 @@ class RWKV_RNN(MyModule):
         aa = state[5*i+2] # exponential moving average of kv
         bb = state[5*i+3] # exponential moving average of k
         pp = state[5*i+4] # idea: use pp to store exponent of a and b
-        ww = time_first + kk # u + k_i
 
+        ww = time_first + kk # u + k_i
         qq = torch.maximum(pp, ww)
         e1 = torch.exp(pp - qq)
         e2 = torch.exp(ww - qq)
-
         a = e1 * aa + e2 * vv
         b = e1 * bb + e2
 
@@ -165,40 +164,32 @@ class RWKV_RNN(MyModule):
             args = self.args
 
             x = w.emb.weight[ctx[-1]]
-            if self.RUN_DEVICE == 'cuda':
-                x = x.cuda()
-            try:
-                pos_emb = w.pos_emb[len(ctx)-1]
-                x = x + pos_emb
-            except:
-                pass
+            if self.RUN_DEVICE == 'cuda': x = x.cuda()
 
-            if state == None:
+            if state == None: # khởi tạo trạng thái hệ thống
                 state = torch.zeros(args.n_layer * 5, args.n_embd, device=self.RUN_DEVICE)
-                for i in range(args.n_layer):
-                    state[5*i+4] -= 1e30
+                for i in range(args.n_layer): state[5*i+4] -= 1e30 # att_pp = dương vô cực
 
+            # Với mỗi tầng
             for i in range(args.n_layer):
-                if i == 0:
-                    x = self.LN(x, w.blocks[i].ln0)
-                
-                ww = w.blocks[i].att
+                if i == 0: x = self.LN(x, w.blocks[i].ln0) # áp dụng LN ở tầng đầu
+
+                # time-mixing
+                ww = w.blocks[i].att # trọng số att
                 x = x + self.SA(self.LN(x, w.blocks[i].ln1), state, i, 
                     ww.time_mix_k, ww.time_mix_v, ww.time_mix_r, ww.time_first, ww.time_decay, 
                     ww.key.weight, ww.value.weight, ww.receptance.weight, ww.output.weight)
                 
-                ww = w.blocks[i].ffn
+                # channel-mixing
+                ww = w.blocks[i].ffn # trọng số fnn
                 x = x + self.FF(self.LN(x, w.blocks[i].ln2), state, i, 
                     ww.time_mix_k, ww.time_mix_r, 
                     ww.key.weight, ww.value.weight, ww.receptance.weight)
                 
-                if (i+1) % RWKV_RESCALE_LAYER == 0:
-                    x = x / 2
+                if (i+1) % RWKV_RESCALE_LAYER == 0: x = x / 2
 
-            if preprocess_only:
-                return state
+            if preprocess_only: return state
 
             x = self.LN(x, w.ln_out)
             x = w.head.weight @ x
-
             return x.float(), state
