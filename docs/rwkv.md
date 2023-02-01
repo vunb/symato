@@ -21,30 +21,40 @@ rwkv là một rnn llm (không dùng attn) với hiệu năng của tfm, nó có
 
 Vì thế nó bao gồm những điều tốt đẹp nhất của rnn và tfm: hiệu năng cao, suy diễn nhanh, tiết kiệm bộ nhớ, huấn luyện nhanh, độ dài ngữ cảnh vô hạn ("infinite" ctx_len), và sentence embedding "miễn phí" (sử dụng trạng thái ẩn cuối).
 
-Bạn có thể chạy mô hình rwkv-4 với từ 3 tới 14 tỉ tham số với [rwkvstic](https://github.com/harrisonvanderbyl/rwkvstic#tables-and-graphs)
+Bạn có thể chạy mô hình rwkv-4 tới 14 tỉ tham số với [rwkvstic](https://github.com/harrisonvanderbyl/rwkvstic)
+### CPU
+```py
+# pip install --upgrade pip && pip install --upgrade "jax[cpu]"
+# pip install rwkvstic transformers sty inquirer scipy
+from rwkvstic.load import RWKV
+from rwkvstic.agnostic.backends import JAX
+file="https://huggingface.co/BlinkDL/rwkv-4-pile-169m/resolve/main/RWKV-4-Pile-169M-20220807-8023.pth"
+# file="https://huggingface.co/BlinkDL/rwkv-4-pile-1b5/resolve/main/RWKV-4-Pile-1B5-20220929-ctx4096.pth"
+model = RWKV(file,mode=JAX)
+ELDR = "\n\nExpert Long Detailed Response: "
+model.resetState();t=input("q: ");model.loadContext("\n", t+ELDR);print(model.forward(number=100)["output"])
 ```
-rwkvstic vram
-Model | 8bit | bf16/fp16 | fp32
-14B   | 16GB | 28GB      | >50GB
-7B    | 8GB  | 14GB      | 28GB
-3B    | 2.8GB| 6GB       | 12GB
-1b5   | 1.3GB| 3GB       | 6GB
+### GPU
+```sh
+pip install rwkvstic transformers sty inquirer scipy pytorch
+# rwkvstic vram
+# Model | 8bit | bf16/fp16 | fp32
+# 14B   | 16GB | 28GB      | >50GB
+# 7B    | 8GB  | 14GB      | 28GB
+# 3B    | 2.8GB| 6GB       | 12GB
+# 1b5   | 1.3GB| 3GB       | 6GB
 ```
 ```py
-# pip install rwkvstic transformers sty inquirer scipy pytorch
 from rwkvstic.load import RWKV; import torch
-# from rwkvstic.agnostic.backends import TORCH
-# file="https://huggingface.co/BlinkDL/rwkv-4-pile-169m/resolve/main/RWKV-4a-Pile-170M-20221209-7955.pth"
-# model = RWKV(file,mode=TORCH,runtimedtype=torch.float32,dtype=torch.float32,useGPU=True)
 from rwkvstic.agnostic.backends import TORCH_QUANT
 file="https://huggingface.co/BlinkDL/rwkv-4-pile-3b/resolve/main/RWKV-4-Pile-3B-20221110-ctx4096.pth"
 # file="https://huggingface.co/BlinkDL/rwkv-4-pile-7b/resolve/main/RWKV-4-Pile-7B-20230109-ctx4096.pth"
 # file="https://huggingface.co/BlinkDL/rwkv-4-pile-14b/resolve/main/RWKV-4-Pile-14B-20230115-5775.pth"
 model = RWKV(file,mode=TORCH_QUANT,runtimedtype=torch.float32,chunksize=4,useGPU=True)
 ELDR = "\n\nExpert Long Detailed Response: "
-# model.resetState()
-t=input("q: ");model.loadContext("\n", t+ELDR);print(model.forward(number=100)["output"])
+model.resetState();t=input("q: ");model.loadContext("\n", t+ELDR);print(model.forward(number=100)["output"])
 ```
+
 Hoặc chạy trên [Google Colab](https://colab.research.google.com/drive/1X4WCvsyo2AyYJc6VT2jNT6oIHTAa-3_m) |
 Hoặc thử [Discord chatbot](https://discord.com/invite/bDSBUMeFpc)
 
