@@ -33,3 +33,8 @@ giả thiết của tớ là mình viết ko dấu rất nhiều trường hợp
 - "Nước Việt Nam hình chữ S => ^ nuoc ws ^ viet zj ^ nam hinh f chu wx ^ s"
 - ^ là token thể hiện sym đằng sau nó viết hoa chữ cái đầu, ws, zj, wx là các marktones giống như mình gõ telex mà bỏ dấu thanh ở cuối
 - ^ kiểu như là mình phải ấn nút shift trước khi gõ chữ cái muốn viết hoa
+
+- - -
+
+![](files/tknz-02.jpg)
+![](files/tknz-03.jpg)
