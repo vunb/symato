@@ -42,3 +42,41 @@ Dùng ChatGPT để học
 2 câu trả lời giống hệt nhau, chứng tỏ prompt đầu vào là giống nhau.
 
 ![](files/apps-05.jpg)
+
+- - -
+
+# Stanford Webinar - GPT-3 & Beyond
+https://www.youtube.com/watch?v=-lnHHWRCDGk
+
+![](files/apps-06.jpg)
+
+8,9,10 are open source.
+
+![](files/apps-07.jpg)
+
+![](files/apps-08.jpg)
+
+![](files/apps-09.jpg)
+ 
+ ![](files/apps-10.jpg)
+Cách làm ngày xưa là gán nhãn, train model riêng cho từng task. Cách làm bây giờ là một llm học nói chung và xử lý được mọi tác vụ bằng in-context learning.
+
+Sức mạnh đến từ self-supervision
+https://youtu.be/-lnHHWRCDGk?t=1120
+
+mô hình học cách sinh mẫu trong chuỗi, và chuỗi ở đây không chỉ là ngôn ngữ, có thể là code, symbols, images, ... mà mô hình học cách liên kết chúng với nhau. Và chỉ với cơ chế đơn giản này chúng ta có rất nhiều kết quả. Nó thực sự rất mạnh mẽ vì chúng ta không cần công sức của con người (để supervise machine). Chúng ta chỉ cần một lượng các symbols lớn. Và từ đó dẫn đến large scale pretrain.
+
+![](files/apps-11.jpg)
+Nó giống như a light way of proramming an AI system using only prompts, and that's going to be incredibly empowering in terms of system development and experimentation.
+
+__Retrieval-augmented in-context learning__
+- LLMs are revolutionizing search
+- Search is revolutionizing NLP
+
+__LLMs for everthing?__
+https://youtu.be/-lnHHWRCDGk?t=1788
+
+![](files/apps-12.jpg)
+
+Những gì dự đoán trong 10 năm mà hơn 2 năm đã thành sự thật.
+
