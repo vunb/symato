@@ -49,4 +49,40 @@ if args.tiny_att_dim > 0 and self.layer_id == args.tiny_att_layer:
     c = c.masked_fill(self.tiny_mask[:T, :T] == 0, 0)
     x = x + c @ self.tiny_v(x_emb)
 return x
+
+
+# class RWKV(pl.LightningModule):
+self.emb = nn.Embedding(args.vocab_size, args.n_embd)
+self.blocks = nn.ModuleList([Block(args, i) for i in range(args.n_layer)])
+
+self.ln_out = nn.LayerNorm(args.n_embd)
+self.head = nn.Linear(args.n_embd, args.vocab_size, bias=False)
+
+ # def forward(self, idx):
+B, T = idx.size()
+assert T <= args.ctx_len, "Cannot forward, model ctx_len is exhausted."
+x = self.emb(idx)
+x_emb = x
+x = block(x, x_emb)
+x = self.ln_out(x)
+x = self.head(x)
+return x
 ```
+
+Tiny attn
+```py
+self.tiny_ln = nn.LayerNorm(args.n_embd)
+self.tiny_q = nn.Linear(args.n_embd, args.tiny_att_dim, bias=False)
+self.tiny_k = nn.Linear(args.n_embd, args.tiny_att_dim, bias=False)
+self.tiny_v = nn.Linear(args.n_embd, args.n_embd, bias=False)
+self.register_buffer("casual_mask", torch.tril(torch.ones(args.ctx_len, args.ctx_len)))
+
+B, T, C = x.size()
+xx = self.tiny_ln(x)
+q = self.tiny_q(xx)[:, :T, :]
+k = self.tiny_k(xx)[:, :T, :]
+att = (q @ k.transpose(-2, -1)) * (args.tiny_att_dim ** (-0.5))
+att = att.masked_fill(self.casual_mask[:T, :T] == 0, 0) # att[i,j]=0 where j > i
+x = x + att @ self.tiny_v(x_emb)
+```
+=> __tiny_attn không dùng softmax__
