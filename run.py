@@ -8,10 +8,10 @@ import numpy as np
 import math, os, sys, types, time, gc
 import torch
 from utils import TOKENIZER
-try:
-    os.environ["CUDA_VISIBLE_DEVICES"] = sys.argv[1]
-except:
-    pass
+
+try: os.environ["CUDA_VISIBLE_DEVICES"] = sys.argv[1]
+except: pass
+
 torch.backends.cudnn.benchmark = True
 torch.backends.cudnn.allow_tf32 = True
 torch.backends.cuda.matmul.allow_tf32 = True
@@ -101,16 +101,12 @@ model = RWKV_RNN(args)
 
 print(f'\nOptimizing speed...')
 out, _ = model.forward([187], None)
-# print(out)
 gc.collect()
 torch.cuda.empty_cache()
 
-# input(0)
-
 print(f'\nLoading tokenizer {WORD_NAME}...')
 tokenizer = TOKENIZER(WORD_NAME, UNKNOWN_CHAR=UNKNOWN_CHAR)
-if TOKEN_MODE == "pile":
-    assert tokenizer.tokenizer.decode([187]) == '\n'
+assert TOKEN_MODE == "pile" and tokenizer.tokenizer.decode([187]) == '\n'
 
 ########################################################################################################
 
@@ -131,11 +127,9 @@ time_slot = {}
 time_ref = time.time_ns()
 
 def record_time(name):
-    if name not in time_slot:
-        time_slot[name] = 1e20
+    if name not in time_slot: time_slot[name] = 1e20
     tt = (time.time_ns() - time_ref) / 1e9
-    if tt < time_slot[name]:
-        time_slot[name] = tt
+    if tt < time_slot[name]: time_slot[name] = tt
 
 init_state = None
 init_out = None
@@ -194,7 +188,6 @@ for TRIAL in range(1 if DEBUG_DEBUG else NUM_TRIALS):
                 out_last = i+1
 
     record_time('total')
-    # print(f'\n\n{time_slot}\n\n')
     print(
         f"\n\n--- preprocess {round(time_slot['preprocess'], 2)}s, generation {round(time_slot['total']-time_slot['preprocess'], 2)}s ", end = ''
     )
