@@ -63,28 +63,25 @@ class RWKV_RNN(MyModule):
 
         # store weights in self.w
         self.w = types.SimpleNamespace()
-        for x in w.keys():
-            xx = x.split('.') # blocks.0.att.value.weight => ['block','0','att'...]
+        for k in w.keys():
+            parts = k.split('.') # blocks.0.att.value.weight => ['block','0','att','value','weight']
+            last = parts.pop() # => last = weight; parts = ['block','0','att','value']
             here = self.w
-            for i in range(len(xx)):
-                if xx[i].isdigit():
-                    ii = int(xx[i])
-                    if ii not in here:
-                        here[ii] = types.SimpleNamespace()
-                    here = here[ii]
-                else:
-                    if i == len(xx) - 1:
-                        setattr(here, xx[i], w[x])
-                    elif not hasattr(here, xx[i]):
-                        if xx[i+1].isdigit():
-                            setattr(here, xx[i], {})
-                        else:
-                            setattr(here, xx[i], types.SimpleNamespace())
-                    here = getattr(here, xx[i])
+            for i, p in enumerate(parts): # mở rộng namespace
+                if p.isdigit():
+                    p = int(p) # dùng [] vì here (w.blocks) là dict object {}
+                    if p not in here: here[p] = types.SimpleNamespace()
+                    here = here[p]
+                else: # dùng hasattr, setattr, getattr vì here là types.SimpleNamespace()
+                    if not hasattr(here, p):
+                        if p == "blocks": setattr(here, p, {})
+                        else: setattr(here, p, types.SimpleNamespace())
+                    here = getattr(here, p)
+            setattr(here, last, w[k]) # gán giá trị vào name part cuối cùng
 
-        self.eval()
-        gc.collect()
-        torch.cuda.empty_cache()
+        self.eval() # torch eval mode (not train mode)
+        gc.collect() # giải phóng ram
+        torch.cuda.empty_cache() # giải phóng vram
 
     def LN(self, x, w):
         return F.layer_norm(x, (self.args.n_embd,), weight=w.weight, bias=w.bias)
