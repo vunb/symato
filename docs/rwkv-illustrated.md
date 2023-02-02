@@ -1,22 +1,22 @@
 # Khái niệm
-- `.` là phép nhân ma trận (vector với ma trận hoặc ma trận với ma trận)
+- `@` là phép nhân ma trận (vector với ma trận hoặc ma trận với ma trận)
 - `*` là phép nhân từng phần tử của vector hoặc ma trận (element-wise product)
 - `n_embed` số chiều của vector nhúng (ví dụ 1024)
-- `ctx_len` còn gọi là chiều dài ngữ cảnh, là độ dài của chuỗi đầu để dữ đoán token tiếp theo (ví dụ 1024)
+- `ctx_len` độ dài ngữ cảnh, là độ dài của chuỗi đầu để dự đoán token tiếp theo (ví dụ cần 1024 tokens đầu vào để dự đoán token 1025)
 - `token`: một token là một vector đầu vào tại một thời điểm nhất định, token.shape = (n_embed)
-- `channel`: kênh thứ i chuỗi giá trị tại một vị trí i của chuỗi tokens đầu vào
+- `channel`: kênh thứ k là chuỗi giá trị (scalar) tại một vị trí thứ k của chuỗi vectors (tokens) đầu vào
 - `token-shift`: trộn giá trị token thứ i với token trước nó với hệ số 0 < mix < 1: `(i-1) x_i * mix + x_{i-1} * (1 - mix)`
 - `time-mixing` trộn giá trị của chuỗi tokens đầu vào với nhau, còn được gọi là attention
 - `channel-mixing`: trộn giá trị các kênh của một token với nhau
 - `x_i` là giá trị đầu vào của token tại thời điểm i
-- `R` là ma trận tham số để tính `r_i = x_i . R`, R.shape = (n_embed, n_embed)
-- `K` là ma trận tham số để tính `k_i = x_i . K`, K.shape = (n_embed, n_embed)
-- `V` là ma trận tham số để tính `v_i = x_i . V`, V.shape = (n_embed, n_embed)
+- `R` là ma trận tham số để tính `r_i = x_i @ R`, R.shape = (n_embed, n_embed)
+- `K` là ma trận tham số để tính `k_i = x_i @ K`, K.shape = (n_embed, n_embed)
+- `V` là ma trận tham số để tính `v_i = x_i @ V`, V.shape = (n_embed, n_embed)
 - `W` là vector tham số để tính time-decay cho từng kênh một, W.shape = (n_embed)
 - `time-first` vector giá trị khởi tạo của time_decay tại thời điểm 0, time_first.shape = (n_embed)
 - `time-decay`: hệ số phân rã theo thời gian theo từng kênh, thể hiện token càng xa với token đang xét thì có độ ảnh hưởng ít hơn
    - `time-decay_0 = time-first`
-   - `time-decay_{n} = (n-1)*W` với n > 0
+   - `time-decay_{n} = (n-1)*W` với n = 1,2,3...
    - `time-decay` của kênh thứ k là `time-first_k, 0, W_k, 2 * W_k, 3 * W_k ...`
 
 Kiến trúc rwkv tương tự như transformer:
@@ -24,7 +24,7 @@ Kiến trúc rwkv tương tự như transformer:
 
 Note: khối `shift` bao gồm `token-shift` và `linear`
 
-# Token-Shift
+# Token-shift
 Trộn token vector hiện tại với token vector ngay trước nó với một tỉ lệ `0 < time_mix < 1`
 ```py
 xk = x * time_mix_k + prev_x * (1 - time_mix_k)
