@@ -1,6 +1,5 @@
 import numpy as np
-import os, types, gc
-import torch
+import os, types, torch
 from torch.nn import functional as F
 
 ########################################################################################################
@@ -41,10 +40,7 @@ class RWKV_RNN(torch.nn.Module):
                     if not hasattr(here, p): setattr(here, p, types.SimpleNamespace())
                     here = getattr(here, p)
             setattr(here, last, w[k]) # gán giá trị vào namespace cuối cùng => self.blocks[0].att.value.weight = w[k]
-
         self.eval() # set torch to inference mode
-        gc.collect() # giải phóng ram
-        torch.cuda.empty_cache() # giải phóng vram
 
     '''state[] để lưu trạng thái của rnn, bước chạy thứ i ghi lại 5 trạng thái: 
     i+0 = ffn_xx : token của bước channel-mixing trước 
@@ -155,6 +151,8 @@ args.n_embd = 768
 args.ctx_len = 1024
 args.vocab_size = 50277
 
+model = RWKV_RNN(args)
+
 ########################################################################################################
 # Step 2: set prompt & sampling stuffs
 ########################################################################################################
@@ -165,14 +163,10 @@ context = "\nIn a shocking finding, scientist discovered a herd of dragons livin
 
 NUM_TRIALS = 3
 LENGTH_PER_TRIAL = 120
-
 TEMPERATURE = 1.0
 top_p = 0.8
 
 print(f'\nUsing {args.RUN_DEVICE.upper()}. Loading {args.MODEL_NAME}...')
-
-torch.set_float32_matmul_precision('high')
-model = RWKV_RNN(args)
 
 def sample_logits(out, temperature=1.0, top_p_usual=0.8):
     probs = F.softmax(out, dim=-1).cpu().numpy()

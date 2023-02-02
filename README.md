@@ -3,7 +3,7 @@ TODOs
 - [x] Tìm cách tokenize hợp với tiếng việt (xem [symato](#symato))
 - [x] Đọc hiểu rwkv ([xem rwkv.md](./docs/rwkv.md) hoặc [bản rút gọn](./docs/rwkv-illustrated.md))
 - [ ] Viết lại rwkv inference engine
-  - [x] engine đơn giản nhất [~215 loc in python](https://github.com/telexyz/symato/blob/main/model_run_f32.py)
+  - [x] engine đơn giản nhất [~200 loc in python](https://github.com/telexyz/symato/blob/main/model_run_f32.py)
   - [ ] C/Zig/ONNX tham khảo https://github.com/AXKuhta/rwkv-onnx-dml
 - [ ] Viết lại rwkv training engine
   - [ ] Viết lại bằng pytorch 2.0
