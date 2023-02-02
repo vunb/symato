@@ -22,7 +22,9 @@
 Kiến trúc rwkv tương tự như transformer:
 ![](files/rwkv-illustrated-00.jpg)
 
-Note: khối `shift` bao gồm `token-shift` và `linear`
+Note:
+- khối `shift` bao gồm `token-shift` và `linear`
+- Sơ đồ giản lược đi, layer-norms và residual connections
 
 # Token-shift
 Trộn token vector hiện tại với token vector ngay trước nó với một tỉ lệ `0 < time_mix < 1`
@@ -98,4 +100,34 @@ time_mixing(self, x, state, i:int, time_mix_k, time_mix_v, time_mix_r, time_firs
     if   self.FLOAT_MODE == "bf16": wkv = wkv.type(torch.bfloat16)
     elif self.FLOAT_MODE == "fp16": wkv = wkv.half()
     return ow @ (r * wkv)
+```
+
+## Model forward
+```py
+def forward(self, token_id, state):
+    x = self.w.emb.weight[token_id] # lấy vector nhúng của token_id
+
+    if state == None: # khởi tạo trạng thái hệ thống
+        state = torch.zeros(self.args.n_layer * 5, self.args.n_embd)
+        for i in range(self.args.n_layer): state[5*i+4] -= 1e30 # state[att_pp] = dương vô cực
+
+    # Áp dụng layer-norm-0 ở tầng đầu tiên để small-init-emb trick hoạt động
+    x = self.layer_norm(x, self.w.blocks[0].ln0)
+    
+    for i in range(self.args.n_layer): # Với mỗi tầng áp dụng:
+        # 1/ time-mixing
+        att = self.w.blocks[i].att # trọng số của khối time-mixing
+        x = x + self.time_mixing(self.layer_norm(x, self.w.blocks[i].ln1), state, i, 
+            att.time_mix_k, att.time_mix_v, att.time_mix_r, att.time_first, att.time_decay, 
+            att.key.weight, att.value.weight, att.receptance.weight, att.output.weight)
+        
+        # 2/ channel-mixing
+        ffn = self.w.blocks[i].ffn # trọng số của khối channel-mixing
+        x = x + self.channel_mixing(self.layer_norm(x, self.w.blocks[i].ln2), state, i, 
+            ffn.time_mix_k, ffn.time_mix_r, 
+            ffn.key.weight, ffn.value.weight, ffn.receptance.weight)
+
+    # Cuối cùng là bộ phân lớp cho ra next token probabilities
+    x = self.w.head.weight @ self.layer_norm(x, self.w.ln_out)
+    return x.float(), state
 ```

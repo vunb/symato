@@ -12,26 +12,24 @@ class RWKV_RNN(torch.nn.Module):
     def __init__(self, args):
         super().__init__()
         self.args = args
+        self.eval() # set torch to inference mode
         
-        # Load params (trọng số) từ file vào vào bộ nhớ (biến w)
+        # Load tham số từ file vào vào bộ nhớ (biến w)
         w = torch.load(args.MODEL_NAME + '.pth', map_location='cpu')
         for k in w.keys():
             if      '.time_' in k: w[k] = w[k].squeeze() # (A,1,B,1) => (A,B)
-            if '.time_decay' in k: w[k] = -torch.exp(w[k].float()) # e ^ negative = decay it's actually e ^ ( - e^ x )
+            if '.time_decay' in k: w[k] = -torch.exp(w[k].float()) # e^negative = decay it's actually `e^{-e^x}``
             else: w[k] = w[k].float() # convert to fp32 type
-
             w[k].requires_grad = False # chỉ inference, nên không cần gradient
-            if args.RUN_DEVICE == 'cuda' and k != 'emb.weight':
-                w[k] = w[k].cuda()           # ^^ embedding lookup table stay in ram
 
-        # Gán trọng số vào tham số mô hình
+        # Gán tham số vào biến số mô hình
         self.w = types.SimpleNamespace()
         self.w.blocks = {}
         for k in w.keys():
             parts = k.split('.') # Ví dụ k = "blocks.0.att.value.weight" => parts = ['block','0','att','value','weight']
             last = parts.pop() # => last = weight; parts = ['block','0','att','value']
             here = self.w # độ sâu hiện tại của tham số mô hình
-            for i, p in enumerate(parts): # từng bước mở rộng namespace
+            for p in parts: # từng bước mở rộng namespace
                 if p.isdigit(): # tầng thứ p
                     p = int(p) # dùng [] vì here (w.blocks) là dict object {}
                     if p not in here: here[p] = types.SimpleNamespace()
@@ -40,7 +38,6 @@ class RWKV_RNN(torch.nn.Module):
                     if not hasattr(here, p): setattr(here, p, types.SimpleNamespace())
                     here = getattr(here, p)
             setattr(here, last, w[k]) # gán giá trị vào namespace cuối cùng => self.blocks[0].att.value.weight = w[k]
-        self.eval() # set torch to inference mode
 
     '''state[] để lưu trạng thái của rnn, bước chạy thứ i ghi lại 5 trạng thái: 
     i+0 = ffn_xx : token của bước channel-mixing trước 
@@ -99,38 +96,33 @@ class RWKV_RNN(torch.nn.Module):
 
         return ow @ (r * wkv)
 
-    def forward(self, token_id, state, preprocess_only = False):
+    def forward(self, token_id, state, preprocess_only=False):
         with torch.no_grad():
-            w = self.w
-            args = self.args
-
-            x = w.emb.weight[token_id]
-            if self.args.RUN_DEVICE == 'cuda': x = x.cuda()
+            x = self.w.emb.weight[token_id] # lấy vector nhúng của token_id
 
             if state == None: # khởi tạo trạng thái hệ thống
-                state = torch.zeros(args.n_layer * 5, args.n_embd, device=self.RUN_DEVICE)
-                for i in range(args.n_layer): state[5*i+4] -= 1e30 # state[att_pp] = dương vô cực
+                state = torch.zeros(self.args.n_layer * 5, self.args.n_embd)
+                for i in range(self.args.n_layer): state[5*i+4] -= 1e30 # state[att_pp] = dương vô cực
 
             # Áp dụng layer-norm-0 ở tầng đầu tiên để small-init-emb trick hoạt động
-            x = self.layer_norm(x, w.blocks[0].ln0)
+            x = self.layer_norm(x, self.w.blocks[0].ln0)
             
-            for i in range(args.n_layer): # Với mỗi tầng áp dụng:
+            for i in range(self.args.n_layer): # Với mỗi tầng áp dụng:
                 # 1/ time-mixing
-                att = w.blocks[i].att # trọng số của khối time-mixing
-                x = x + self.time_mixing(self.layer_norm(x, w.blocks[i].ln1), state, i, 
+                att = self.w.blocks[i].att # trọng số của khối time-mixing
+                x = x + self.time_mixing(self.layer_norm(x, self.w.blocks[i].ln1), state, i, 
                     att.time_mix_k, att.time_mix_v, att.time_mix_r, att.time_first, att.time_decay, 
                     att.key.weight, att.value.weight, att.receptance.weight, att.output.weight)
                 
                 # 2/ channel-mixing
-                ffn = w.blocks[i].ffn # trọng số của khối channel-mixing
-                x = x + self.channel_mixing(self.layer_norm(x, w.blocks[i].ln2), state, i, 
+                ffn = self.w.blocks[i].ffn # trọng số của khối channel-mixing
+                x = x + self.channel_mixing(self.layer_norm(x, self.w.blocks[i].ln2), state, i, 
                     ffn.time_mix_k, ffn.time_mix_r, 
                     ffn.key.weight, ffn.value.weight, ffn.receptance.weight)
 
             if preprocess_only: return state
             # Cuối cùng là bộ phân lớp cho ra next token probabilities
-            x = self.layer_norm(x, w.ln_out)
-            x = w.head.weight @ x
+            x = self.w.head.weight @ self.layer_norm(x, self.w.ln_out)
             return x.float(), state
 
 ##########################################################################################################
@@ -142,13 +134,14 @@ TOKENIZER = PreTrainedTokenizerFast(tokenizer_file="20B_tokenizer.json")
 os.environ["TOKENIZERS_PARALLELISM"] = "false" # huggingface tokenizer setting to avoid deadlocks
 
 args = types.SimpleNamespace()
-args.RUN_DEVICE = "cpu" # 'cuda'
-
+args.vocab_size = 50277
+args.ctx_len = 1024
 args.MODEL_NAME = "RWKV-4-Pile-169M-20220807-8023"
 args.n_layer = 12
 args.n_embd = 768
-args.ctx_len = 1024
-args.vocab_size = 50277
+# args.MODEL_NAME = "RWKV-4-Pile-1B5-20220929-ctx4096"
+# args.n_layer = 24
+# args.n_embd = 2048
 
 model = RWKV_RNN(args)
 
@@ -165,7 +158,7 @@ LENGTH_PER_TRIAL = 120
 TEMPERATURE = 1.0
 top_p = 0.8
 
-print(f'\nUsing {args.RUN_DEVICE.upper()}. Loading {args.MODEL_NAME}...')
+print(f'\nUsing CPU. Loading {args.MODEL_NAME}...')
 
 def sample_logits(out, temperature=1.0, top_p_usual=0.8):
     probs = F.softmax(out, dim=-1).cpu().numpy()
@@ -194,13 +187,8 @@ for i in range(0, src_len): init_state = model.forward(src_ctx[i], init_state, T
 
 for TRIAL in range(NUM_TRIALS):
     print(f'\n\n--[ trial {TRIAL} ]-----------------\n', context, end="")
-
     state = init_state.clone()
     for i in range(src_len, src_len + LENGTH_PER_TRIAL): # sinh thêm LENGTH_PER_TRIAL
         out, state = model.forward(next_token_id, state)
-        out[0] = -999999999  # disable <|endoftext|>
         next_token_id = sample_logits(out, TEMPERATURE, top_p) # lấy mẫu ngẫu nhiên token tiếp theo
-
-        token = TOKENIZER.decode(next_token_id)
-        if '\ufffd' not in token: # is valid utf8 string? (bỏ qua invalid token)
-            print(token, end="", flush=True)
+        print(TOKENIZER.decode(next_token_id), end="", flush=True)
