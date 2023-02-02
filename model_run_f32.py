@@ -1,3 +1,5 @@
+# Modified from https://github.com/BlinkDL/RWKV-LM/tree/main/RWKV-v4
+
 import numpy as np
 import os, types, torch
 from torch.nn import functional as F
