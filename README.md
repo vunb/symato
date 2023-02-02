@@ -3,20 +3,19 @@ TODOs
 - [x] Tìm cách tokenize hợp với tiếng việt (xem [symato](#symato))
 - [x] Đọc hiểu rwkv ([xem rwkv.md](./docs/rwkv.md) hoặc [bản rút gọn](./docs/rwkv-illustrated.md))
 - [ ] Viết lại rwkv inference engine
-  - [x] engine đơn giản nhất [~200 loc in python](https://github.com/telexyz/symato/blob/main/model_run_f32.py)
-  - [ ] C/Zig/ONNX tham khảo https://github.com/AXKuhta/rwkv-onnx-dml
+  - [x] engine đơn giản [~200 loc in python](https://github.com/telexyz/symato/blob/main/model_run_f32.py)
+  - [ ] engine tối ưu C/Zig/ONNX tham khảo https://github.com/AXKuhta/rwkv-onnx-dml
 - [ ] Viết lại rwkv training engine
   - [ ] Viết lại bằng pytorch 2.0
-  - [ ] Tối ưu cuda code hoặc viết lại bằng Triton
+  - [ ] Tối ưu nhân cuda hoặc viết lại bằng Triton
   - [ ] Thử nghiệm với byte-lm
 - [ ] rwkv vs nanogpt với dataset âm tiết tiếng Việt
-  - [ ] Tạo symato vocab và tknz
+  - [ ] Tạo symato vocab và symato tknz
   - [ ] Tạo dataset với ctx_len 1024 (ctx_len ~=500 âm tiết, ~=20 dòng)
   - [ ] So sánh tốc độ, hiệu năng
-- [ ] Toán trong rwkv
-  - [ ] Hiểu rwkv-4 [tiny-attn](./docs/tiny-attn.md), chưa có công thức hồi quy cho tiny-attn?
-  - [ ] Tại sao [công thức hồi quy rwkv-4](./docs/wkv-cuda.md#tai-sao-lai-dung-cong-thuc-moi) lại khác đi?
-  - [ ] diagonal matrix, ODE, State Space Models (xem [svd.md](./docs/svd.md))
+- [ ] Toán
+  - [ ] Chưa có công thức hồi quy cho [tiny-attn](./docs/tiny-attn.md)?
+  - [ ] Tại sao [công thức hồi quy rwkv-4](./docs/wkv-cuda.md#tai-sao-lai-dung-cong-thuc-moi) lại đổi sang formula (new)?
 
 - - -
 
