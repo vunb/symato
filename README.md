@@ -1,14 +1,14 @@
 TODOs
 
-- [x] Tìm cách tokenize hợp với tiếng việt => xem [symato](#symato)
-- [x] Đọc hiểu rwkv => [xem rwkv.md](./docs/rwkv.md) hoặc [bản rút gọn](./docs/rwkv-illustrated.md)
-- [ ] Hiểu các tricks quan trọng trong rwkv
-  - [x] Hiểu [rwkv token-shift + time mix factors](./docs/token-shift.md#token-shift-time-shift-mixing)
-  - [ ] Hiểu rwkv-4b [tiny-attn](./docs/tiny-attn.md), chưa có công thức hồi quy cho tiny-attn?
-  - [ ] Tại sao [công thức hồi quy rwkv-4](./docs/wkv-cuda.md#tai-sao-lai-dung-cong-thuc-moi) lại khác đi?
+- [x] Tìm cách tokenize hợp với tiếng việt (xem [symato](#symato))
+- [x] Đọc hiểu rwkv ([xem rwkv.md](./docs/rwkv.md) hoặc [bản rút gọn](./docs/rwkv-illustrated.md))
 - [ ] Viết lại rwkv inference engine
 - [ ] Viết lại rwkv training engine 
 - [ ] rwkv vs nanogpt với dataset âm tiết tiếng Việt
+- [ ] Toán trong rwkv
+  - [ ] Hiểu rwkv-4b [tiny-attn](./docs/tiny-attn.md), chưa có công thức hồi quy cho tiny-attn?
+  - [ ] Tại sao [công thức hồi quy rwkv-4](./docs/wkv-cuda.md#tai-sao-lai-dung-cong-thuc-moi) lại khác đi?
+  - [ ] diagonal matrix, ODE, State Space Models (xem [svd.md](./docs/svd.md))
 
 - - -
 
