@@ -2,12 +2,10 @@ TODOs
 
 - [x] Tìm cách tokenize hợp với tiếng việt (xem [symato](#symato))
 - [x] Đọc hiểu rwkv ([xem rwkv.md](./docs/rwkv.md) hoặc [bản rút gọn](./docs/rwkv-illustrated.md))
-- [ ] Viết lại rwkv inference engine
-  - [x] engine đơn giản [~200 loc in python](https://github.com/telexyz/symato/blob/main/model_run_f32.py)
-  - [ ] engine tối ưu C/Zig/ONNX tham khảo https://github.com/AXKuhta/rwkv-onnx-dml
+- [x] Viết lại rwkv inference engine [~200 loc in python](https://github.com/telexyz/symato/blob/main/model_run_f32.py)
 - [ ] Viết lại rwkv training engine
   - [ ] Viết lại bằng pytorch 2.0
-  - [ ] Tối ưu nhân cuda hoặc viết lại bằng Triton
+  - [ ] Tối ưu nhân cuda?
   - [ ] Thử nghiệm với byte-lm
 - [ ] rwkv vs nanogpt với dataset âm tiết tiếng Việt
   - [ ] Tạo symato vocab và symato tknz
