@@ -1,10 +1,10 @@
 TODOs
 
 - [x] Tìm cách tokenize hợp với tiếng việt => xem [symato](#symato)
-- [x] Đọc hiểu rwkv => [xem rwkv.md](./docs/rwkv.md)
+- [x] Đọc hiểu rwkv => [xem rwkv.md](./docs/rwkv.md) hoặc [bản rút gọn](./docs/rwkv-illustrated.md)
 - [ ] Hiểu các tricks quan trọng trong rwkv
   - [x] Hiểu [rwkv token-shift + time mix factors](./docs/token-shift.md#token-shift-time-shift-mixing)
-  - [ ] Hiểu rwkv-4b [tiny-attn](./docs/tiny-attn.md), chưa có ct hồi quy cho tiny-attn?
+  - [ ] Hiểu rwkv-4b [tiny-attn](./docs/tiny-attn.md), chưa có công thức hồi quy cho tiny-attn?
   - [ ] Tại sao [công thức hồi quy rwkv-4](./docs/wkv-cuda.md#tai-sao-lai-dung-cong-thuc-moi) lại khác đi?
 - [ ] Viết lại rwkv infer / decode engine
 - [ ] Viết lại rwkv training engine 

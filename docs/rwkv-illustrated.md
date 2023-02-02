@@ -36,13 +36,13 @@ Xem giải thích chi tiết tại [token-shift.md](./token-shift.md)
 # Channel-mixing
 ```py
 def channel_mixing(self, x, state, i:int, time_mix_k, time_mix_r, kw, vw, rw):
-    ffn_xx = 5*i+0 # ffn = channel mixing
-    prev_x = state[ffn_xx]
+    prev_x_idx = 5*i+0
+    prev_x = state[prev_x_idx]
 
     # token-shift with diff mixing factors for k and r
     xk = x * time_mix_k + prev_x * (1 - time_mix_k)
     xr = x * time_mix_r + prev_x * (1 - time_mix_r)
-    state[ffn_xx] = x
+    state[prev_x_idx] = x
 
     r = torch.sigmoid(rw @ xr) # receptance factor: 0 -> 1
     k = torch.square(torch.relu(kw @ xk)) # square relu, primer paper
@@ -63,13 +63,13 @@ Note: formula (old) là công thức hồi quy chuẩn, formula (new) là công 
 ## Triển khai formula (new) thành code
 ```py
 time_mixing(self, x, state, i:int, time_mix_k, time_mix_v, time_mix_r, time_first, time_decay, kw, vw, rw, ow):
-    att_xx = 5*i+1 # attention or time mixing
-    prev_x = state[att_xx]
+    prev_x_idx = 5*i+1 # attention or time mixing
+    prev_x = state[prev_x_idx]
     # token-shift
     xk = x * time_mix_k + prev_x * (1 - time_mix_k)
     xv = x * time_mix_v + prev_x * (1 - time_mix_v)
     xr = x * time_mix_r + prev_x * (1 - time_mix_r)
-    state[att_xx] = x # prev_x = x
+    state[prev_x_idx] = x # prev_x = x
 
     r = torch.sigmoid(rw @ xr)
     k = kw @ xk
