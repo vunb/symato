@@ -1,3 +1,5 @@
+# Modified from https://github.com/BlinkDL/RWKV-LM/tree/main/RWKV-v4
+
 import numpy as np
 import os, types, torch
 from torch.nn import functional as F
@@ -9,10 +11,8 @@ from torch.nn import functional as F
 class RWKV_RNN(torch.nn.Module):
     def __init__(self, args):
         super().__init__()
-
         self.args = args
-        self.RUN_DEVICE = args.RUN_DEVICE
-
+        
         # Load params (trọng số) từ file vào vào bộ nhớ (biến w)
         w = torch.load(args.MODEL_NAME + '.pth', map_location='cpu')
         for k in w.keys():
@@ -105,7 +105,7 @@ class RWKV_RNN(torch.nn.Module):
             args = self.args
 
             x = w.emb.weight[token_id]
-            if self.RUN_DEVICE == 'cuda': x = x.cuda()
+            if self.args.RUN_DEVICE == 'cuda': x = x.cuda()
 
             if state == None: # khởi tạo trạng thái hệ thống
                 state = torch.zeros(args.n_layer * 5, args.n_embd, device=self.RUN_DEVICE)
@@ -139,12 +139,11 @@ class RWKV_RNN(torch.nn.Module):
 
 from transformers import PreTrainedTokenizerFast
 TOKENIZER = PreTrainedTokenizerFast(tokenizer_file="20B_tokenizer.json")
-
-args = types.SimpleNamespace()
-args.RUN_DEVICE = "cpu" # 'cuda' // 'cpu' (already fast)
 os.environ["TOKENIZERS_PARALLELISM"] = "false" # huggingface tokenizer setting to avoid deadlocks
 
-# wget https://huggingface.co/BlinkDL/rwkv-4-pile-169m/resolve/main/RWKV-4-Pile-169M-20220807-8023.pth
+args = types.SimpleNamespace()
+args.RUN_DEVICE = "cpu" # 'cuda'
+
 args.MODEL_NAME = "RWKV-4-Pile-169M-20220807-8023"
 args.n_layer = 12
 args.n_embd = 768
