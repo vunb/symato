@@ -3,7 +3,7 @@ import types
 import torch
 from torch.nn import functional as F
 
-class RWKV_RNN(torch.jit.ScriptModule):
+class RWKV_RNN(torch.nn.Module):
     def __init__(self, args):
         super().__init__()
 
@@ -52,7 +52,8 @@ class RWKV_RNN(torch.jit.ScriptModule):
     def layer_norm(self, x, w):
         return F.layer_norm(x, (self.args.n_embd,), weight=w.weight, bias=w.bias)
 
-    @torch.jit.script_method
+
+    @torch.compile
     def channel_mixing(self, x, state, i:int, time_mix_k, time_mix_r, kw, vw, rw):
         ffn_xx = 5*i+0 # feed-forward or channel mixing
         # token-shift with diff mixing factors for k and r
@@ -64,7 +65,8 @@ class RWKV_RNN(torch.jit.ScriptModule):
         k = torch.square(torch.relu(kw @ xk)) # square relu, primer paper
         return r * (vw @ k)
 
-    @torch.jit.script_method
+
+    @torch.compile
     def time_mixing(self, x, state, i:int, time_mix_k, time_mix_v, time_mix_r, time_first, time_decay, kw, vw, rw, ow):
         att_xx = 5*i+1 # attention or time mixing
         # token-shift

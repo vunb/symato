@@ -12,8 +12,7 @@ TOKENIZER = PreTrainedTokenizerFast(tokenizer_file="20B_tokenizer.json")
 
 args = types.SimpleNamespace()
 args.RUN_DEVICE = "cpu" # 'cuda' // 'cpu' (already fast)
-os.environ["RWKV_JIT_ON"] = '1' # '1' or '0'. very useful for GPU/CPU fp32
-os.environ["RWKV_RUN_DEVICE"] = args.RUN_DEVICE
+os.environ["TOKENIZERS_PARALLELISM"] = "false" # huggingface tokenizer setting to avoid deadlocks
 
 # wget https://huggingface.co/BlinkDL/rwkv-4-pile-169m/resolve/main/RWKV-4-Pile-169M-20220807-8023.pth
 args.MODEL_NAME = "RWKV-4-Pile-169M-20220807-8023"
@@ -43,23 +42,19 @@ top_p = 0.8
 print(f'\nUsing {args.RUN_DEVICE.upper()}. Loading {args.MODEL_NAME}...')
 
 from model_run_f32 import RWKV_RNN
+torch.set_float32_matmul_precision('high')
 model = RWKV_RNN(args)
 
-out, _ = model.forward([187], None) # warm-up; token_id 187 => '\n'
-gc.collect(); torch.cuda.empty_cache() # free mem
-
-
-def sample_logits(out, temperature=1.0, top_p_usual=None):
-    probs = F.softmax(out, dim=-1)
-    top_p = top_p_usual
-    probs = probs.cpu().numpy()
-    sorted_probs = np.sort(probs)[::-1]
-    cumulative_probs = np.cumsum(sorted_probs)
-    cutoff = float(sorted_probs[np.argmax(cumulative_probs > top_p)])
-    probs[probs < cutoff] = 0
+def sample_logits(out, temperature=1.0, top_p_usual=0.8):
+    probs = F.softmax(out, dim=-1).cpu().numpy()
+    sorted_probs = np.sort(probs)
+    cumulative_probs = np.cumsum(sorted_probs) # [1,2,3] => [1,3,6]
+    idx = np.argmax(cumulative_probs > top_p_usual) # vì là mảng True, False nên trả về idx của True đầu tiên
+    cutoff = float(sorted_probs[idx]) # cutoff là tổng những prob lớn nhất đầu tiên vượt qua top_p_usual
+    probs[probs < cutoff] = 0 # bỏ đi những prob < cutoff
     if temperature != 1.0: probs = probs.pow(1.0 / temperature)
-    probs = probs / np.sum(probs)
-    return np.random.choice(a=len(probs), p=probs)
+    probs = probs / np.sum(probs) # chuẩn hóa lại probs sao cho tổng = 1
+    return np.random.choice(a=len(probs), p=probs) # lấy mẫu
 
 ########################################################################################################
 
