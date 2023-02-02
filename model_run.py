@@ -48,7 +48,7 @@ class RWKV_RNN(MyModule):
                 if 'att.output.weight' in k: w[k] = w[k] / rescale
                 if  'ffn.value.weight' in k: w[k] = w[k] / rescale
                 if      '.time_' in k: w[k] = w[k].squeeze() # (A,1,B,1) => (A,B)
-                if '.time_decay' in k: w[k] = -torch.exp(w[k].float()) 
+                if '.time_decay' in k: w[k] = -torch.exp(w[k].float())#; print(">>> time_decay", w[k])
                 # e ^ negative = decay it's actually e ^ ( - e^ x ) biến time_decay thành số âm
                 if '.time_first' in k: w[k] = w[k].float()
                 else: # các tham số khác
@@ -186,6 +186,7 @@ class RWKV_RNN(MyModule):
                     ww.time_mix_k, ww.time_mix_r, 
                     ww.key.weight, ww.value.weight, ww.receptance.weight)
                 
+                # rescale x = x / 2 for each 6 block to prevent FP16 overflow
                 if (i+1) % RWKV_RESCALE_LAYER == 0: x = x / 2
 
             if preprocess_only: return state
