@@ -1,18 +1,8 @@
 # https://github.com/BlinkDL/RWKV-LM/blob/main/RWKV-v4neo/src/utils.py
-import json, time, random, os
+import json, os
 import numpy as np
 import torch
 from torch.nn import functional as F
-
-time_slot = {}
-time_ref = time.time_ns()
-
-def record_time(name):
-    if name not in time_slot:
-        time_slot[name] = 1e20
-    tt = (time.time_ns() - time_ref) / 1e9
-    if tt < time_slot[name]:
-        time_slot[name] = tt
 
 class TOKENIZER():
     def __init__(self, WORD_NAME, UNKNOWN_CHAR='\ue083'):
@@ -48,7 +38,6 @@ class TOKENIZER():
         return context
 
     def sample_logits(self, out, x, ctx_len, temperature=1.0, top_p_usual=None, top_p_newline=None):
-        # out[self.UNKNOWN_CHAR] = -float('Inf')
         lastChar = int(x[-1])
 
         probs = F.softmax(out, dim=-1)

@@ -524,7 +524,6 @@ args.n_layer = n_layer
 args.n_embd = n_embd
 args.ctx_len = ctx_len
 args.vocab_size = vocab_size
-args.head_qk = 0
 args.pre_ffn = 0
 args.grad_cp = 0
 args.my_pos_emb = 0

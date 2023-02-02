@@ -7,7 +7,7 @@
 import numpy as np
 import math, os, sys, types, time, gc
 import torch
-from utils import TOKENIZER
+from tknz import TOKENIZER
 
 try: os.environ["CUDA_VISIBLE_DEVICES"] = sys.argv[1]
 except: pass
