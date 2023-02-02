@@ -1,7 +1,11 @@
-import gc
-import types
+import numpy as np
+import os, types, gc
 import torch
 from torch.nn import functional as F
+
+########################################################################################################
+# Step 0: Define the model in inference mode
+########################################################################################################
 
 class RWKV_RNN(torch.nn.Module):
     def __init__(self, args):
@@ -52,8 +56,7 @@ class RWKV_RNN(torch.nn.Module):
     def layer_norm(self, x, w):
         return F.layer_norm(x, (self.args.n_embd,), weight=w.weight, bias=w.bias)
 
-
-    @torch.compile
+    # @torch.compile
     def channel_mixing(self, x, state, i:int, time_mix_k, time_mix_r, kw, vw, rw):
         ffn_xx = 5*i+0 # feed-forward or channel mixing
         # token-shift with diff mixing factors for k and r
@@ -65,8 +68,7 @@ class RWKV_RNN(torch.nn.Module):
         k = torch.square(torch.relu(kw @ xk)) # square relu, primer paper
         return r * (vw @ k)
 
-
-    @torch.compile
+    # @torch.compile
     def time_mixing(self, x, state, i:int, time_mix_k, time_mix_v, time_mix_r, time_first, time_decay, kw, vw, rw, ow):
         att_xx = 5*i+1 # attention or time mixing
         # token-shift
@@ -101,12 +103,12 @@ class RWKV_RNN(torch.nn.Module):
 
         return ow @ (r * wkv)
 
-    def forward(self, ctx, state, preprocess_only = False):
+    def forward(self, token_id, state, preprocess_only = False):
         with torch.no_grad():
             w = self.w
             args = self.args
 
-            x = w.emb.weight[ctx[-1]]
+            x = w.emb.weight[token_id]
             if self.RUN_DEVICE == 'cuda': x = x.cuda()
 
             if state == None: # khởi tạo trạng thái hệ thống
@@ -134,3 +136,78 @@ class RWKV_RNN(torch.nn.Module):
             x = self.layer_norm(x, w.ln_out)
             x = w.head.weight @ x
             return x.float(), state
+
+##########################################################################################################
+# Step 1: set model & config (use v4 to run your trained-from-scratch models. v4 and v4neo are compatible)
+##########################################################################################################
+
+from transformers import PreTrainedTokenizerFast
+TOKENIZER = PreTrainedTokenizerFast(tokenizer_file="20B_tokenizer.json")
+
+args = types.SimpleNamespace()
+args.RUN_DEVICE = "cpu" # 'cuda' // 'cpu' (already fast)
+os.environ["TOKENIZERS_PARALLELISM"] = "false" # huggingface tokenizer setting to avoid deadlocks
+
+# wget https://huggingface.co/BlinkDL/rwkv-4-pile-169m/resolve/main/RWKV-4-Pile-169M-20220807-8023.pth
+args.MODEL_NAME = "RWKV-4-Pile-169M-20220807-8023"
+args.n_layer = 12
+args.n_embd = 768
+args.ctx_len = 1024
+args.vocab_size = 50277
+
+########################################################################################################
+# Step 2: set prompt & sampling stuffs
+########################################################################################################
+
+context = "\nIn a shocking finding, scientist discovered a herd of dragons living in a remote, " + \
+    "previously unexplored valley, in Tibet. Even more surprising to the researchers " + \
+    "was the fact that the dragons spoke perfect Chinese."
+
+NUM_TRIALS = 3
+LENGTH_PER_TRIAL = 120
+
+TEMPERATURE = 1.0
+top_p = 0.8
+
+print(f'\nUsing {args.RUN_DEVICE.upper()}. Loading {args.MODEL_NAME}...')
+
+torch.set_float32_matmul_precision('high')
+model = RWKV_RNN(args)
+
+def sample_logits(out, temperature=1.0, top_p_usual=0.8):
+    probs = F.softmax(out, dim=-1).cpu().numpy()
+    sorted_probs = np.sort(probs)
+    cumulative_probs = np.cumsum(sorted_probs) # [1,2,3] => [1,3,6]
+    idx = np.argmax(cumulative_probs > top_p_usual) # vì là mảng True, False nên trả về idx của True đầu tiên
+    cutoff = float(sorted_probs[idx]) # cutoff là tổng những prob lớn nhất đầu tiên vượt qua top_p_usual
+    probs[probs < cutoff] = 0 # bỏ đi những prob < cutoff
+    if temperature != 1.0: probs = probs.pow(1.0 / temperature)
+    probs = probs / np.sum(probs) # chuẩn hóa lại probs sao cho tổng = 1
+    return np.random.choice(a=len(probs), p=probs) # lấy mẫu
+
+########################################################################################################
+# Step 3: generate more tokens given the prompt
+########################################################################################################
+
+src_ctx = TOKENIZER.encode(context) # context => token_ids
+src_len = len(src_ctx)
+print(f"\nYour prompt has {src_len} tokens.")
+
+init_state = None
+next_token_id = src_ctx[-1]
+
+# Khởi tạo init_state bằng cách chạy mô hình hết gần hết
+for i in range(0, src_len): init_state = model.forward(src_ctx[i], init_state, True)
+
+for TRIAL in range(NUM_TRIALS):
+    print(f'\n\n--[ trial {TRIAL} ]-----------------\n', context, end="")
+
+    state = init_state.clone()
+    for i in range(src_len, src_len + LENGTH_PER_TRIAL): # sinh thêm LENGTH_PER_TRIAL
+        out, state = model.forward(next_token_id, state)
+        out[0] = -999999999  # disable <|endoftext|>
+        next_token_id = sample_logits(out, TEMPERATURE, top_p) # lấy mẫu ngẫu nhiên token tiếp theo
+
+        token = TOKENIZER.decode(next_token_id)
+        if '\ufffd' not in token: # is valid utf8 string? (bỏ qua invalid token)
+            print(token, end="", flush=True)
