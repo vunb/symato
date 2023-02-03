@@ -1,9 +1,10 @@
-''' USAGE
+''' Rewritten from https://github.com/BlinkDL/RWKV-LM
+
 [ -f 20B_tokenizer.json ] || wget https://raw.githubusercontent.com/BlinkDL/RWKV-LM/main/RWKV-v4neo/20B_tokenizer.json
 [ -f RWKV-4-Pile-169M-20220807-8023.pth ] || wget https://huggingface.co/BlinkDL/rwkv-4-pile-169m/resolve/main/RWKV-4-Pile-169M-20220807-8023.pth
 python3 model_run_f32.py
+
 '''
-# Modified from https://github.com/BlinkDL/RWKV-LM/tree/main/RWKV-v4
 
 import numpy as np
 import os, types, torch
@@ -20,7 +21,7 @@ class RWKV_RNN(torch.nn.Module):
         self.eval() # set torch to inference mode
         
         # Load tham số từ file vào vào bộ nhớ (biến w)
-        w = torch.load(args.MODEL_NAME + '.pth', map_location='cpu')
+        w = torch.load(args.MODEL_NAME, map_location='cpu')
         for k in w.keys():
             if      '.time_' in k: w[k] = w[k].squeeze() # (A,1,B,1) => (A,B)
             if '.time_decay' in k: w[k] = -torch.exp(w[k].float()) # e^negative = decay it's actually `e^{-e^x}``
@@ -136,15 +137,16 @@ class RWKV_RNN(torch.nn.Module):
 
 from transformers import PreTrainedTokenizerFast
 TOKENIZER = PreTrainedTokenizerFast(tokenizer_file="20B_tokenizer.json")
-os.environ["TOKENIZERS_PARALLELISM"] = "false" # huggingface tokenizer setting to avoid deadlocks
 
 args = types.SimpleNamespace()
 args.vocab_size = 50277
 args.ctx_len = 1024
-args.MODEL_NAME = "RWKV-4-Pile-169M-20220807-8023"
+
+args.MODEL_NAME = "RWKV-4-Pile-169M-20220807-8023.pth"
 args.n_layer = 12
 args.n_embd = 768
-# args.MODEL_NAME = "RWKV-4-Pile-1B5-20220929-ctx4096"
+
+# args.MODEL_NAME = "RWKV-4-Pile-1B5-20220929-ctx4096.pth"
 # args.n_layer = 24
 # args.n_embd = 2048
 
@@ -180,20 +182,15 @@ def sample_logits(out, temperature=1.0, top_p_usual=0.8):
 # Step 3: generate more tokens given the prompt
 ########################################################################################################
 
-src_ctx = TOKENIZER.encode(context) # context => token_ids
-src_len = len(src_ctx)
-print(f"\nYour prompt has {src_len} tokens.")
-
-init_state = None
-next_token_id = src_ctx[-1]
-
-# Khởi tạo init_state bằng cách chạy mô hình hết gần hết
-for i in range(0, src_len): init_state = model.forward(src_ctx[i], init_state, True)
+out, init_state = None, None
+# Nhồi context (a.k.a prompt) vào mô hình
+for token_id in TOKENIZER.encode(context):
+    out, init_state = model.forward(token_id, init_state)
 
 for TRIAL in range(NUM_TRIALS):
-    print(f'\n\n--[ trial {TRIAL} ]-----------------\n', context, end="")
-    state = init_state.clone()
-    for i in range(src_len, src_len + LENGTH_PER_TRIAL): # sinh thêm LENGTH_PER_TRIAL
-        out, state = model.forward(next_token_id, state)
-        next_token_id = sample_logits(out, TEMPERATURE, top_p) # lấy mẫu ngẫu nhiên token tiếp theo
-        print(TOKENIZER.decode(next_token_id), end="", flush=True)
+    print(f'\n\n--[ Lần thử {TRIAL} ]-----------------', context)
+    state = init_state.clone() # clone() để giữ nguyên init_state cho lần TRIAL tiếp theo
+    for i in range(LENGTH_PER_TRIAL): # sinh thêm LENGTH_PER_TRIAL tokens nữa từ prompt đầu vào
+        token_id = sample_logits(out, TEMPERATURE, top_p) # lấy mẫu ngẫu nhiên token tiếp theo
+        print(TOKENIZER.decode(token_id), end="", flush=True)
+        out, state = model.forward(token_id, state)
