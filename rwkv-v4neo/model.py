@@ -381,23 +381,9 @@ class RWKV(pl.LightningModule):
 
 
     def training_step(self, batch, batch_idx):
-        args = self.args
-        if args.my_qa_mask == 0:
-            idx, targets = batch
-            logits = self(idx)
-            loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1))
-        else:
-            idx, targets, mask = batch
-            mask = mask.view(-1)
-            sum_mask = torch.sum(mask).item()
-
-            logits = self(idx)
-            if sum_mask == mask.shape[0]:
-                loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1))
-            else:
-                loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1), reduction='none')
-                loss = torch.sum(loss * mask) / sum_mask
-
+        idx, targets = batch
+        logits = self(idx)
+        loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1))
         return L2Wrap.apply(loss, logits)
 
 
