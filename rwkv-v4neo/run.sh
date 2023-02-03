@@ -1,6 +1,6 @@
 # cd data; wget https://data.deepai.org/enwik8.zip; unzip enwik8.zip; cd ..
 
-python3 train.py --load_model "out/rwkv-20.pth" --wandb "L6-D512-enwik8" --proj_dir "out" \
+python3 train.py --load_model "out/rwkv-20.pth" --wandb "" --proj_dir "out" \
 --data_file "data/enwik8" --data_type "utf-8" --vocab_size 0 \
 --ctx_len 256 --epoch_steps 3000 --epoch_count 20 --epoch_begin 0 --epoch_save 5 \
 --micro_bsz 24 --n_layer 6 --n_embd 512 --pre_ffn 0 --head_qk 0 \
@@ -9,3 +9,4 @@ python3 train.py --load_model "out/rwkv-20.pth" --wandb "L6-D512-enwik8" --proj_
 
 # Each "epoch" = 2000 steps, 32000 samples, 8192000 tokens
 # Data has 99621832 tokens, 6064 vocab size.
+# loss=0.881, lr=1.84e-5

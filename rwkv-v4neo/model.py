@@ -26,66 +26,66 @@ if os.environ["RWKV_JIT_ON"] == "1":
 # CUDA Kernel
 ########################################################################################################
 
-T_MAX = int(os.environ["RWKV_T_MAX"])  # TAKES LOTS OF VRAM!
+FLOAT_MODE = os.environ["RWKV_FLOAT_MODE"] # "fp32", "tf32", "fp16", "bf16"
+FLOAT_MODE_fp32 = ("32" in FLOAT_MODE)
+FLOAT_MODE_fp16 = (FLOAT_MODE == "fp16")
+FLOAT_MODE_bf16 = (FLOAT_MODE == "bf16")
+
+T_MAX = int(os.environ["RWKV_T_MAX"]) # == args.ctx_len, TAKES LOTS OF VRAM!
 # it's possible to go beyond CUDA limitations if you slice the ctx and pass the hidden state in each slice
-# => BPTT, lợi thế của RNN
 
 from torch.utils.cpp_extension import load
-
-wkv_cuda = load(name=f"wkv_{T_MAX}", sources=["wkv_op.cpp", "wkv_cuda.cu"], verbose=True, extra_cuda_cflags=["-res-usage", "--maxrregcount 60", "--use_fast_math", "-O3", "-Xptxas -O3", f"-DTmax={T_MAX}"])
+wkv_cuda = load(name=f"wkv_{T_MAX}", sources=["wkv_op.cpp", "wkv_cuda.cu"],
+    verbose=True, extra_cuda_cflags=["-res-usage", "--maxrregcount 60", "--use_fast_math", "-O3", "-Xptxas -O3", f"-DTmax={T_MAX}"])
 
 class WKV(torch.autograd.Function):
     @staticmethod
     def forward(ctx, B, T, C, w, u, k, v):
-        ctx.B = B
-        ctx.T = T
-        ctx.C = C
+        ctx.B, ctx.T, ctx.C = B, T, C
         assert T <= T_MAX
-        assert B * C % min(C, 32) == 0
-        if "32" in os.environ["RWKV_FLOAT_MODE"]:
+        if C > 32: assert (B * C) % 32 == 0, "Nếu C > 32 thì B * C phải chia hết cho 32"
+
+        if FLOAT_MODE_fp32:
             w = -torch.exp(w.contiguous())
             u = u.contiguous()
             k = k.contiguous()
             v = v.contiguous()
-        else:
+        else: # biến thành f32
             w = -torch.exp(w.float().contiguous())
             u = u.float().contiguous()
             k = k.float().contiguous()
             v = v.float().contiguous()
+
         ctx.save_for_backward(w, u, k, v)
         y = torch.empty((B, T, C), device=w.device, memory_format=torch.contiguous_format)
-        wkv_cuda.forward(B, T, C, w, u, k, v, y)
-        if "32" in os.environ["RWKV_FLOAT_MODE"]:
-            return y
-        elif os.environ["RWKV_FLOAT_MODE"] == "fp16":
-            return y.half()
-        elif os.environ["RWKV_FLOAT_MODE"] == "bf16":
-            return y.bfloat16()
+        wkv_cuda.forward(B, T, C, w, u, k, v, y) # giá trị được lưu vào y
+
+        if   FLOAT_MODE_fp32: return y
+        elif FLOAT_MODE_fp16: return y.half()
+        elif FLOAT_MODE_bf16: return y.bfloat16()
+
 
     @staticmethod
     def backward(ctx, gy):
-        B = ctx.B
-        T = ctx.T
-        C = ctx.C
+        B, T, C = ctx.B, ctx.T, ctx.C
         assert T <= T_MAX
-        assert B * C % min(C, 32) == 0
+        if C > 32: assert (B * C) % 32 == 0
+
         w, u, k, v = ctx.saved_tensors
         gw = torch.zeros((B, C), device=gy.device).contiguous()
         gu = torch.zeros((B, C), device=gy.device).contiguous()
         gk = torch.zeros((B, T, C), device=gy.device).contiguous()
         gv = torch.zeros((B, T, C), device=gy.device).contiguous()
-        if "32" in os.environ["RWKV_FLOAT_MODE"]:
-            wkv_cuda.backward(B, T, C, w, u, k, v, gy.contiguous(), gw, gu, gk, gv)
-        else:
-            wkv_cuda.backward(B, T, C, w, u, k, v, gy.float().contiguous(), gw, gu, gk, gv)
+
+        if not FLOAT_MODE_fp32: gy_ = gy.float() # biến đổi thành f32
+        wkv_cuda.backward(B, T, C, w, u, k, v, gy_.contiguous(), gw, gu, gk, gv)
+
         gw = torch.sum(gw, dim=0)
         gu = torch.sum(gu, dim=0)
-        if "32" in os.environ["RWKV_FLOAT_MODE"]:
-            return (None, None, None, gw, gu, gk, gv)
-        elif os.environ["RWKV_FLOAT_MODE"] == "fp16":
-            return (None, None, None, gw.half(), gu.half(), gk.half(), gv.half())
-        elif os.environ["RWKV_FLOAT_MODE"] == "bf16":
-            return (None, None, None, gw.bfloat16(), gu.bfloat16(), gk.bfloat16(), gv.bfloat16())
+
+        if   FLOAT_MODE_fp32: return (None, None, None, gw, gu, gk, gv)
+        elif FLOAT_MODE_fp16: return (None, None, None, gw.half(), gu.half(), gk.half(), gv.half())
+        elif FLOAT_MODE_bf16: return (None, None, None, gw.bfloat16(), gu.bfloat16(), gk.bfloat16(), gv.bfloat16())
 
 
 def RUN_CUDA(B, T, C, w, u, k, v):
@@ -104,7 +104,6 @@ class RWKV_TimeMix(MyModule):
         self.layer_id = layer_id
         self.ctx_len = args.ctx_len
         self.n_embd = args.n_embd
-        self.my_testing = self.args.my_testing
         attn_sz = args.n_embd
 
         with torch.no_grad():  # fancy init
@@ -112,57 +111,51 @@ class RWKV_TimeMix(MyModule):
             ratio_1_to_almost0 = 1.0 - (layer_id / args.n_layer)  # 1 to ~0
 
             # fancy time_decay
-            decay_speed = torch.ones(attn_sz)
-            for h in range(attn_sz):
-                decay_speed[h] = -5 + 8 * (h / (attn_sz - 1)) ** (0.7 + 1.3 * ratio_0_to_1)
-            self.time_decay = nn.Parameter(decay_speed)
-            # print(layer_id, self.time_decay.flatten()[:3].cpu().numpy(), '...', self.time_decay.flatten()[-3:].cpu().numpy())
+            decay_speed = [-5 + 8*(h / (attn_sz - 1)) ** (0.7 + 1.3 * ratio_0_to_1) for h in range(attn_sz) ]
+            self.time_decay = nn.Parameter(torch.tensor(decay_speed))
+            # time_decay => -5.00, -3.16, -1.89, -0.78,  0.23,  1.20,  2.11,  3.00
 
             # fancy time_first
             zigzag = torch.tensor([(i + 1) % 3 - 1 for i in range(attn_sz)]) * 0.5
             self.time_first = nn.Parameter(torch.ones(attn_sz) * math.log(0.3) + zigzag)
+            # zigzag     =>  0.00,  0.50, -0.50,  0.00,  0.50, -0.50,  0.00,  0.50
+            # time_first => -1.20, -0.70, -1.70, -1.20, -0.70, -1.70, -1.20, -0.70
 
             # fancy time_mix
             x = torch.ones(1, 1, args.n_embd)
-            for i in range(args.n_embd):
-                x[0, 0, i] = i / args.n_embd
+            for i in range(args.n_embd): x[0, 0, i] = i / args.n_embd
             self.time_mix_k = nn.Parameter(torch.pow(x, ratio_1_to_almost0))
             self.time_mix_v = nn.Parameter(torch.pow(x, ratio_1_to_almost0) + 0.3 * ratio_0_to_1)
             self.time_mix_r = nn.Parameter(torch.pow(x, 0.5 * ratio_1_to_almost0))
+            # time_mix_k => 0.00, 0.13, 0.26, 0.39, 0.51, 0.63, 0.75, 0.87
+            # time_mix_v => 0.01, 0.14, 0.27, 0.40, 0.52, 0.65, 0.77, 0.89
+            # time_mix_r => 0.00, 0.36, 0.51, 0.62, 0.71, 0.79, 0.87, 0.93
 
-        self.time_shift = nn.ZeroPad2d((0, 0, 1, -1))
-
+        self.time_shift = nn.ZeroPad2d((0, 0, 1, -1)) # padding zero trước embd vector đầu tiên trong batch
         self.key = nn.Linear(args.n_embd, attn_sz, bias=False)
         self.value = nn.Linear(args.n_embd, attn_sz, bias=False)
         self.receptance = nn.Linear(args.n_embd, attn_sz, bias=False)
-
         self.output = nn.Linear(attn_sz, args.n_embd, bias=False)
-
-        # if self.my_testing > 0:
-        #     self.aaa = nn.Parameter(torch.zeros(1, 1, args.n_embd))
 
     @MyFunction
     def jit_func(self, x):
-
         # Mix x with the previous timestep to produce xk, xv, xr
-        xx = self.time_shift(x)
+        xx = self.time_shift(x) # prev_x
         xk = x * self.time_mix_k + xx * (1 - self.time_mix_k)
         xv = x * self.time_mix_v + xx * (1 - self.time_mix_v)
         xr = x * self.time_mix_r + xx * (1 - self.time_mix_r)
-
         # Use xk, xv, xr to produce k, v, r
         k = self.key(xk)
         v = self.value(xv)
         r = self.receptance(xr)
-        sr = torch.sigmoid(r)
-
+        sr = torch.sigmoid(r) # sigmoid(receptance)
+        # 
         return sr, k, v
 
+    # Tại sao không jit toàn bộ forward mà chỉ jit phần tính sr, k, v
     def forward(self, x):
         B, T, C = x.size()  # x = (Batch,Time,Channel)
-
         sr, k, v = self.jit_func(x)
-
         rwkv = sr * RUN_CUDA(B, T, C, self.time_decay, self.time_first, k, v)
         rwkv = self.output(rwkv)
         return rwkv
@@ -173,31 +166,25 @@ class RWKV_ChannelMix(MyModule):
         super().__init__()
         self.args = args
         self.layer_id = layer_id
-        self.my_testing = self.args.my_testing
         self.time_shift = nn.ZeroPad2d((0, 0, 1, -1))
 
         with torch.no_grad():  # fancy init of time_mix
             ratio_1_to_almost0 = 1.0 - (layer_id / args.n_layer)  # 1 to ~0
-
             x = torch.ones(1, 1, args.n_embd)
-            for i in range(args.n_embd):
-                x[0, 0, i] = i / args.n_embd
+            for i in range(args.n_embd): x[0, 0, i] = i / args.n_embd
 
             self.time_mix_k = nn.Parameter(torch.pow(x, ratio_1_to_almost0))
             self.time_mix_r = nn.Parameter(torch.pow(x, ratio_1_to_almost0))
+            # time_mix_k => 0.00, 0.13, 0.26, 0.39, 0.51, 0.63, 0.75, 0.87
+            # time_mix_r => 0.00, 0.13, 0.26, 0.39, 0.51, 0.63, 0.75, 0.87
 
         hidden_sz = 4 * args.n_embd
         self.key = nn.Linear(args.n_embd, hidden_sz, bias=False)
         self.receptance = nn.Linear(args.n_embd, args.n_embd, bias=False)
         self.value = nn.Linear(hidden_sz, args.n_embd, bias=False)
 
-        # if self.my_testing in [1]:
-        #     self.aaa = nn.Parameter(torch.zeros(1, 1, hidden_sz))
-        # elif self.my_testing in [2]:
-        #     self.aaa = nn.Parameter(torch.zeros(1, 1, args.n_embd))
 
-
-    @MyFunction
+    @MyFunction # jit toàn bộ forward của channel-mix
     def forward(self, x):
         xx = self.time_shift(x)
         xk = x * self.time_mix_k + xx * (1 - self.time_mix_k)
@@ -210,24 +197,10 @@ class RWKV_ChannelMix(MyModule):
         rkv = torch.sigmoid(self.receptance(xr)) * kv
         return rkv
 
-        # k = self.key(xk)
-        # # if self.my_testing in [0, 2]:
-        # k = torch.square(torch.relu(k))
-        # # elif self.my_testing == 1:
-        # #     k = torch.square(torch.relu(k)) + k * self.aaa
-        # kv = self.value(k)
-        # r = self.receptance(xr)
-        # # if self.my_testing == 0:
-        # r = torch.sigmoid(r)
-        # # elif self.my_testing == 2:
-        # #     r = torch.sigmoid(r) + r * self.aaa
-        # rkv = r * kv
-        # return rkv
 
 ########################################################################################################
 # The RWKV Model with our blocks
 ########################################################################################################
-
 
 class Block(nn.Module):
     def __init__(self, args, layer_id):
@@ -246,17 +219,19 @@ class Block(nn.Module):
 
         if self.layer_id == 0 and self.args.pre_ffn > 0:
             self.ffnPre = RWKV_ChannelMix(args, 0)
-        else:
-            self.att = RWKV_TimeMix(args, layer_id)
+        else:  self.att = RWKV_TimeMix(args, layer_id)
+        # Đôi khi thay att của tầng đầu (layer_id == 0) bằng ffn lại cho kết quả tốt hơn
 
         self.ffn = RWKV_ChannelMix(args, layer_id)
-        
+
         if args.tiny_att_dim > 0 and self.layer_id == args.tiny_att_layer:
+            # Thêm tiny attention để liên kết các tokens cực xa nhau tốt hơn!
             self.tiny_ln = nn.LayerNorm(args.n_embd)
             self.tiny_q = nn.Linear(args.n_embd, args.tiny_att_dim, bias=False)
             self.tiny_k = nn.Linear(args.n_embd, args.tiny_att_dim, bias=False)
             self.tiny_v = nn.Linear(args.n_embd, args.n_embd, bias=False)
             self.register_buffer("tiny_mask", torch.tril(torch.ones(args.ctx_len, args.ctx_len)))
+
 
     def forward(self, x, x_emb=None):
         args = self.args
@@ -404,11 +379,11 @@ class RWKV(pl.LightningModule):
             c = (q @ k.transpose(-2, -1)) * (1.0 / args.head_qk)
             c = c.masked_fill(self.copy_mask[:T, :T] == 0, 0)
 
-            if "32" in os.environ["RWKV_FLOAT_MODE"]:
+            if FLOAT_MODE_fp32:
                 c = c @ F.one_hot(idx, num_classes=args.vocab_size)
-            elif os.environ["RWKV_FLOAT_MODE"] == "fp16":
+            elif FLOAT_MODE_fp16:
                 c = c @ F.one_hot(idx, num_classes=args.vocab_size).half()
-            elif os.environ["RWKV_FLOAT_MODE"] == "bf16":
+            elif FLOAT_MODE_bf16:
                 c = c @ F.one_hot(idx, num_classes=args.vocab_size).bfloat16()
 
             x = self.head(x) + c
@@ -508,9 +483,9 @@ class RWKV(pl.LightningModule):
                     nn.init.orthogonal_(m[n], gain=gain * scale)
 
             m[n] = m[n].cpu()
-            if os.environ["RWKV_FLOAT_MODE"] == "fp16":
+            if FLOAT_MODE_fp16:
                 m[n] = m[n].half()
-            elif os.environ["RWKV_FLOAT_MODE"] == "bf16":
+            elif FLOAT_MODE_bf16:
                 m[n] = m[n].bfloat16()
 
             # if n == "emb.weight":

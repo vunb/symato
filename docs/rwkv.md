@@ -63,9 +63,9 @@ Hoặc thử [Discord chatbot](https://discord.com/invite/bDSBUMeFpc)
 ![](files/rwkv-chat-03.jpg)
 
 ## rwkv rất hiệu quả
-- RWKV-3 1.5B on A40 (tf32) = always 0.015 sec/token, simple pytorch code, GPU 45%, VRAM 7.8G
-- GPT2-XL 1.3B on A40 (tf32) = 0.032 sec/token (ctx_len 1000), using HF,   GPU 45%, VRAM 9.7G
-- Training speed: RWKV-4 1.5B BF16 ctxlen1024 = 106K tokens/s on 8xA100 40G.
+- RWKV-3 1.5B on A40 (tf32) = always __67 tokens/s__, simple pytorch code, GPU 45%, VRAM 7.8G
+- GPT2-XL 1.3B on A40 (tf32) = __31 tokens/s__ (ctx_len 1000), using HF,   GPU 45%, VRAM 9.7G
+- Training speed: RWKV-4 1.5B BF16 ctxlen1024 = __106K tokens/s__ on 8xA100 40G.
 - Tốc độ suy diễn rất nhanh ngay cả với CPU vì chỉ cần nhân vector với ma trận, __bạn có thể chạy rwkv trên smartphone__
 - Huấn luyện rất trơn tru - no loss spikes (learning_rate và batch_size thay đổi ở 15G tokens)
 ![](files/rwkv-02.png)
@@ -86,9 +86,9 @@ Có thể hiểu rằng có hai mô hình rwkv trong cùng một bộ tham số 
 
 Điểm khác biệt nổi bật nhất của rwkv không chỉ là tính chất vừa là tfm vừa là rnn (nhiều mô hình cũng có tính chất tương tự), mà là ở độ hiệu quả khi được triển khai như một mô hình ngôn ngữ lớn (huấn luyện từ vài trăm triệu tới vài tỉ tham số). Có nhiều mô hình vừa là tfm vừa là rnn, nhưng chưa mô hình nào được thử nghiệm với dữ liệu đủ lớn để chứng minh tính hiệu quả (Peng Bo nói những mô hình chưa được thử nghiệm với dataset đủ lớn và những bài tests llm chuẩn chỉ là soulless).
 
-rwkv đã trải qua những thử nghiệm đó và chứng minh tính hiệu quả với một đường loss giảm giảm dần rất trơn tru, có đưọc điều này là do Beng Po áp dụng nhiều mẹo và cũng do tính chất của rnn nói chung, và hiệu năng (độ chính xác) của mô hình tương đương với các tfm cùng số lượng tham số. Việc huấn luyện cũng nhanh và trơn tru hơn tfm (without loss spikes at all). Và cũng tốt hơn với lượng dữ liệu nhỏ hay nói cách khác là không đòi hỏi lượng dữ liệu huấn luyện lớn để đạt được hiệu suất cao (well it's convering faster so that's like "do better with less data"). Beng Po tin rằng rwkv "scaling" tốt hơn tfm !!!
+rwkv đã trải qua những thử nghiệm đó và chứng minh tính hiệu quả với một đường loss giảm giảm dần rất trơn tru, có đưọc điều này là do Beng Po áp dụng nhiều mẹo và cũng do tính chất của rnn nói chung, và hiệu năng (độ chính xác) của mô hình tương đương với các tfm cùng số lượng tham số. Việc huấn luyện cũng nhanh và trơn tru hơn tfm (without loss spikes at all). Và cũng tốt hơn với lượng dữ liệu nhỏ hay nói cách khác là không đòi hỏi lượng dữ liệu huấn luyện lớn để đạt được hiệu suất cao (well it's convering faster so that's like "do better with less data"). __Beng Po tin rằng rwkv "scaling" tốt hơn tfm !!!__
 
-Và với sự kết hợp giữa tfm và rnn này, ta có thể train rwkv với ctx_len nhỏ 1024 và tinh chỉnh (fine-tune) nó với ctx_len dài hơn rất nhiều. Nó cũng có khả năng ngoại suy (dùng với ctx len dài hơn ctx len lúc train) ngay cả khi chưa được fine-tune. (TODO: cần tìm hiểu thêm tại sao lại làm được như thế)
+Và với sự kết hợp giữa tfm và rnn này, ta có thể train rwkv với ctx_len nhỏ 1024 và tinh chỉnh (fine-tune) nó với ctx_len dài hơn rất nhiều. (TODO: cần tìm hiểu thêm tại sao lại làm được như thế, dùng mode rnn?). Nó cũng có khả năng ngoại suy (dùng với ctx len dài hơn ctx len lúc train) ngay cả khi chưa được fine-tune.
 
 rwkv cũng có mối liên hệ với state space models, điển hình là bài báo về H3 và FlashConv của Trí Đào vừa ra mắt. Tuy nhiên H3 không loại bỏ hoàn toàn self-attn mà giữ lại 2 tầng SA. Beng Po cũng chỉ ra rằng H3 hoạt động kém hơn rwkv, nhưng nếu H3 áp dụng toàn bộ các mẹo của rwkv thì sẽ đạt được hiệu quả tương đương. Trí Đào là tác giả của FlashAttn, và những điểm hấp dẫn nhất của FlashAttn cũng như FlashConv là cách các tác giả triển khai thuật toán của họ tối ưu nhất cho CUDA, nhiều khả năng ta cũng có thể áp dụng cách triển khai tối ưu tương tự cho rwkv (TODO: tìm cách tối ưu hóa hết mức có thể cho CUDA rwkv).
 

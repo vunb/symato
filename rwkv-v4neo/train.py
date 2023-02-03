@@ -95,7 +95,6 @@ if __name__ == "__main__":
     parser.add_argument("--load_partial", default=0, type=int)
     parser.add_argument("--magic_prime", default=0, type=int)
     parser.add_argument("--my_qa_mask", default=0, type=int)
-    parser.add_argument("--my_testing", default='', type=str)
 
     parser = Trainer.add_argparse_args(parser)
     args = parser.parse_args()
@@ -131,7 +130,6 @@ if __name__ == "__main__":
     args.betas = (args.beta1, args.beta2)
     args.real_bsz = int(args.num_nodes) * int(args.devices) * args.micro_bsz
     os.environ["RWKV_T_MAX"] = str(args.ctx_len)
-    os.environ["RWKV_MY_TESTING"] = args.my_testing
 
     args.run_name = f"{args.vocab_size} ctx{args.ctx_len} L{args.n_layer} D{args.n_embd}"
     if not os.path.exists(args.proj_dir):
