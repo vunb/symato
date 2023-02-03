@@ -108,7 +108,7 @@ class RWKV_RNN(torch.nn.Module):
 
             if state == None: # khởi tạo trạng thái hệ thống
                 state = torch.zeros(self.args.n_layer * 5, self.args.n_embd)
-                for i in range(self.args.n_layer): state[5*i+4] -= 1e30 # state[att_pp] = dương vô cực
+                for i in range(self.args.n_layer): state[5*i+4] = -1e30 # state[att_pp] = âm vô cực
 
             # Áp dụng layer-norm-0 ở tầng đầu tiên để small-init-emb trick hoạt động
             x = self.layer_norm(x, self.w.blocks[0].ln0)
