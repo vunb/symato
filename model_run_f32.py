@@ -150,8 +150,6 @@ args.n_embd = 768
 # args.n_layer = 24
 # args.n_embd = 2048
 
-model = RWKV_RNN(args)
-
 ########################################################################################################
 # Step 2: set prompt & sampling stuffs
 ########################################################################################################
@@ -164,8 +162,6 @@ NUM_TRIALS = 3
 LENGTH_PER_TRIAL = 120
 TEMPERATURE = 1.0
 top_p = 0.8
-
-print(f'\nUsing CPU. Loading {args.MODEL_NAME}...')
 
 def sample_logits(out, temperature=1.0, top_p_usual=0.8):
     probs = F.softmax(out, dim=-1).cpu().numpy()
@@ -181,6 +177,9 @@ def sample_logits(out, temperature=1.0, top_p_usual=0.8):
 ########################################################################################################
 # Step 3: generate more tokens given the prompt
 ########################################################################################################
+
+print(f'\nUsing CPU. Loading {args.MODEL_NAME} ...')
+model = RWKV_RNN(args)
 
 out, init_state = None, None
 # Nhồi context (a.k.a prompt) vào mô hình
