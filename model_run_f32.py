@@ -48,7 +48,7 @@ class RWKV_RNN(torch.jit.ScriptModule):
                     here = getattr(here, p)
             setattr(here, last, w[k]) # gán giá trị vào namespace cuối cùng => self.blocks[0].att.value.weight = w[k]
 
-    '''state[] để lưu trạng thái của rnn, bước chạy thứ i ghi lại 5 trạng thái: 
+    '''state[] để lưu trạng thái của rnn, mỗi tầng i ghi lại 5 trạng thái: 
     i+0 = ffn_xx : token của bước channel-mixing trước 
     i+1 = att_xx : token của bước time-mixing trước
     i+2 = att_aa : exp moving avg của kv 
@@ -121,7 +121,7 @@ class RWKV_RNN(torch.jit.ScriptModule):
             # 0/ Khởi tạo trạng thái hệ thống nếu chưa được khởi tạo
             if state == None:
                 state = torch.zeros(self.args.n_layer * 5, self.args.n_embd)
-                for i in range(self.args.n_layer): state[5*i+4] -= 1e30 # state[att_pp] = dương vô cực
+                for i in range(self.args.n_layer): state[5*i+4] = -1e30 # state[att_pp] = âm vô cực
 
             # 1/ Lấy vector nhúng của token_id
             x = self.w.emb.weight[token_id]
