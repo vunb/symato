@@ -45,7 +45,7 @@ class RWKV_RNN(torch.nn.Module):
                     here = getattr(here, p)
             setattr(here, last, w[k]) # gán giá trị vào namespace cuối cùng => self.blocks[0].att.value.weight = w[k]
 
-    '''state[] để lưu trạng thái của rnn, bước chạy thứ i ghi lại 5 trạng thái: 
+    '''state[] để lưu trạng thái của rnn, mỗi tầng i ghi lại 5 trạng thái: 
     i+0 = ffn_xx : token của bước channel-mixing trước 
     i+1 = att_xx : token của bước time-mixing trước
     i+2 = att_aa : exp moving avg của kv 
