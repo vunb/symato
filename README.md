@@ -8,8 +8,10 @@ TODOs
   - [x] Thiết kế symato vocab
   - [x] Tạo mini dataset vlc.xyz
   - [x] Huấn luyện symato-2816-vlc-23m
-  - [x] Chạy thử symato-2816-vlc-23m `./run.sh`
+  - [x] Chạy symato-2816-vlc-23m `./run.sh`
+  - [ ] Huấn luyện symato-2816-vlc-nanogpt
   - [ ] Huấn luyện symato-16384-vlc
+- [ ] Viết miniRWKV, train = công thức GPT, giải mã bằng RNN
 - [ ] Toán
   - [ ] Chưa có công thức hồi quy cho [tiny-attn](./docs/tiny-attn.md)?
   - [ ] Tại sao [công thức hồi quy rwkv-4](./docs/wkv-cuda.md#tai-sao-lai-dung-cong-thuc-moi) lại đổi sang formula (new)?

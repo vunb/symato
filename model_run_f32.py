@@ -279,3 +279,4 @@ for TRIAL in range(NUM_TRIALS):
                     cap_id = None
                 print(token, end="", flush=True)
         out, state = model.forward(token_id, state)
+print()
