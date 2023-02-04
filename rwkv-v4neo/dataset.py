@@ -13,18 +13,14 @@ class MyDataset(Dataset):
     def __init__(self, args):
         self.args = args
 
-        if args.data_type == "numpy":
-            self.data = np.load(args.data_file).astype("int")
-            self.vocab_size = args.vocab_size
-            rank_zero_info("Current vocab size =", self.vocab_size, "(make sure it's correct)")
+        if args.data_type == "symato":
+            import sys; sys.path.append('../')
+            from symato import Symato
+            smt = Symato()
+            self.data  = smt.tokenize(args.data_file)
+            self.vocab_size = smt.vocab_size()
             self.data_size = len(self.data)
-            rank_zero_info(f"Data has {self.data_size} tokens.")
-
-        elif args.data_type == "uint16":
-            self.data = np.fromfile(args.data_file, dtype=np.uint16).astype("int32").reshape(-1, args.my_sample_len)
-            self.vocab_size = args.vocab_size
-            rank_zero_info("Current vocab size =", self.vocab_size, "(make sure it's correct)")
-            self.data_size = self.data.shape[0]
+            rank_zero_info(f"Current vocab size = {self.vocab_size} (make sure it's correct)")
             rank_zero_info(f"Data has {self.data_size} samples.")
 
         elif args.data_type == "dummy":
@@ -61,9 +57,13 @@ class MyDataset(Dataset):
         epoch = self.real_epoch
         world_size = self.world_size
 
-        if args.data_type == "uint16":
-            i = np.random.randint(0, self.data_size-1)
-            dix = self.data[i]
+        if args.data_type == "symato":
+            ctx_len = args.ctx_len # ctx_len là độ dài chuỗi token đầu vào
+            req_len = ctx_len + 1  # cộng thêm một token là kết quả đầu ra 
+            magic_prime = args.magic_prime
+            data = self.data
+            i = np.random.randint(0, self.data_size - req_len)
+            dix = data[i : i + req_len]
             x = torch.tensor(dix[:-1], dtype=torch.long)
             y = torch.tensor(dix[1:], dtype=torch.long)
 
