@@ -7,7 +7,6 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 from pytorch_lightning.utilities import rank_zero_info
-from utils import MaybeIsPrime
 
 
 class MyDataset(Dataset):
@@ -25,15 +24,12 @@ class MyDataset(Dataset):
             self.data = open(args.data_file, "r", encoding=args.data_type).read()
 
             rank_zero_info("Building token list...")
-            unique = sorted(list(set(self.data)))
+            unique = sorted(list(set(self.data))) # vocab = unique unicode chars in dataset
             self.vocab_size = len(unique)
-            xx = 0
-            xxObj = {}
-            for u in unique:
-                xxObj[xx] = u
-                xx += 1
+            vocab = {}
+            for i, u in enumerate(unique): vocab[i] = u
             with open(f"{args.proj_dir}/vocab.json", "w", encoding="utf-8") as vocab_file:
-                vocab_file.write(json.dumps(xxObj, ensure_ascii=False))
+                vocab_file.write(json.dumps(vocab, ensure_ascii=False))
             self.data_size = len(self.data)
             rank_zero_info(f"Data has {self.data_size} tokens, {self.vocab_size} vocab size.")
             self.stoi = {ch: i for i, ch in enumerate(unique)}
@@ -49,7 +45,6 @@ class MyDataset(Dataset):
         rank = self.global_rank
         epoch = self.real_epoch
         world_size = self.world_size
-        # print(f"epoch {epoch} idx {idx} rank {rank}/{world_size}")
 
         if args.data_type == "uint16":
             i = np.random.randint(0, self.data_size-1)
@@ -58,8 +53,8 @@ class MyDataset(Dataset):
             y = torch.tensor(dix[1:], dtype=torch.long)
 
         else:
-            ctx_len = args.ctx_len
-            req_len = ctx_len + 1
+            ctx_len = args.ctx_len # ctx_len là độ dài chuỗi token đầu vào
+            req_len = ctx_len + 1  # cộng thêm một token là kết quả đầu ra 
             magic_prime = args.magic_prime
             data = self.data
 
@@ -68,22 +63,12 @@ class MyDataset(Dataset):
                 factor = (math.sqrt(5) - 1) / 2
                 factor = int(magic_prime * factor)
                 i = ((factor * ii * ii * ii) % magic_prime) * ctx_len
-                if data == self.data_pile:
-                    i = i + args.my_pile_shift
-                # print(f"epoch {epoch} idx {idx} rank {rank}/{world_size} ii {ii} pos {round(i / self.data_size, 3)}")
+                if data == self.data_pile: i += args.my_pile_shift
             else:
                 # cheat: pick a random spot in dataset
                 i = np.random.randint(0, self.data_size - req_len)
 
-            if args.data_type == "binidx":
-                dix = data.get(idx=0, offset=i, length=req_len).astype(int)
-            # 
-            elif args.data_type == "numpy":
-                dix = data[i : i + req_len]
-            # 
-            else:
-                dix = [self.stoi[s] for s in data[i : i + req_len]]
-
+            dix = [self.stoi[s] for s in data[i : i + req_len]]
             x = torch.tensor(dix[:-1], dtype=torch.long)
             y = torch.tensor(dix[1:], dtype=torch.long)
             
