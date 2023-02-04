@@ -11,6 +11,7 @@ TODOs
   - [x] Chạy symato-2816-vlc-23m `./run.sh`
   - [ ] Huấn luyện symato-2816-vlc-nanogpt
   - [ ] Huấn luyện symato-16384-vlc
+- [ ] Thêm các tricks như token-shift, receptance từ rwkv vào nanoGPT và đo lường độ hiệu quả
 - [ ] Viết miniRWKV, train = công thức GPT, giải mã bằng RNN
 - [ ] Toán
   - [ ] Chưa có công thức hồi quy cho [tiny-attn](./docs/tiny-attn.md)?
