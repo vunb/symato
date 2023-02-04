@@ -26,15 +26,12 @@ Thiết lập các thử nghiệm theo mô hình ngôn ngữ [RWKV](./docs/rwkv.
 
 - Bao nhiêu lượng dữ liệu là đủ để pre-train tiếp một mô hình đang có cho một ngôn ngữ lạ?
 
-- Liệu những gì nó học được từ ngôn ngữ này có thể "mang sang" ngôn ngữ khác không?
+- Liệu những gì nó học được từ lĩnh vực này có thể "mang sang" lĩnh vực khác không?
 
-- Với một lượng dữ liệu nhất định, của một domain cụ thể thì nên tokenization như thế nào? Bao nhiêu params / training bao lâu là đủ?
+- Với một lượng dữ liệu nhất định, của một lĩnh vực cụ thể thì nên tokenization như thế nào? Bao nhiêu params / training bao lâu là đủ?
 
 - Làm sao để tăng khả năng sử dụng tối đa sức mạnh phần cứng đang có để huấn luyện mô hình?
-  - FlashRWKV: tối ưu RWKV theo cách FlashAttention và FlashConv làm được cho Self-Attention và State Space Models (H3 paper)
-  - AMP: Auto-Mixed Precision + BitsAndBytes quantization
   - Sử dụng [2:4 spare matrix](https://timdettmers.com/2023/01/16/which-gpu-for-deep-learning/#Sparse_Network_Training) (có thể coi đây là Dropout với p = 0.5)
-  - Viết lại bằng C++/CUDA framework (tham khảo [tiny-cuda-nn](https://github.com/NVlabs/tiny-cuda-nn))
 
 - - -
 

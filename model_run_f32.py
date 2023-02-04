@@ -193,7 +193,7 @@ class RWKV_RNN(torch.jit.ScriptModule):
 from symato import Symato
 TOKENIZER = Symato()
 args = types.SimpleNamespace()
-args.MODEL_NAME = "./rwkv-v4neo/out/rwkv-5.pth"
+args.MODEL_NAME = "./rwkv-v4neo/out/rwkv-15.pth"
 args.vocab_size = 2816
 args.ctx_len = 512
 args.n_layer = 6
@@ -235,11 +235,12 @@ print(f'\nUsing CPU. Loading {args.MODEL_NAME} ...')
 model = RWKV_RNN(args)
 
 out, init_state, finetune_tids = None, None, []
+
 # Nhồi context (a.k.a prompt) vào mô hình
 for token_id in TOKENIZER.encode(context):
-    # print(">>>", token_id)
     finetune_tids.append(token_id)
     out, init_state = model.forward(token_id, init_state)
+    # Tự động bỏ dấu thanh nếu chưa có
     if is_symato and TOKENIZER.is_sym(token_id):
         best_marktone_id = 256 + out.numpy()[256:274].argmax()
         finetune_tids.append(best_marktone_id)
@@ -250,7 +251,7 @@ finetune_context = "".join(finetune_context)
 
 for TRIAL in range(NUM_TRIALS):
     print(f'\n\n--[ Lần thử {TRIAL} ]-----------------')
-    print(f'prompt đầu vào không dấu thanh: {context}\nTự động bỏ dấu thanh: [ {finetune_context}] ', end="")
+    print(f'Hỏi: {context}\nĐáp: [ {finetune_context}] ', end="")
     state = init_state.clone() # clone() để giữ nguyên init_state cho lần TRIAL tiếp theo
 
     for i in range(LENGTH_PER_TRIAL): # sinh thêm LENGTH_PER_TRIAL tokens nữa từ prompt đầu vào
