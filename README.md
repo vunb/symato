@@ -4,8 +4,10 @@ TODOs
 - [x] Đọc hiểu rwkv ([xem rwkv.md](./docs/rwkv.md) hoặc [bản rút gọn](./docs/rwkv-illustrated.md))
 - [x] Viết lại rwkv inference engine [~200 loc in python](https://github.com/telexyz/symato/blob/main/model_run_f32.py)
 - [x] Đọc hiểu và rút gọn [code training](./rwkv-v4neo)
-- [ ] rwkv vs nanogpt với dataset âm tiết tiếng Việt
-  - [ ] Tạo symato vocab và symato dataset
+- [ ] rwkv-lm (vs nanogpt) với dataset âm tiết tiếng Việt
+  - [ ] Thiết kế symato vocab
+  - [ ] Tạo symato vi_wiki_all.bin
+  - [ ] Thiết kế model và huấn luyện
 - [ ] Toán
   - [ ] Chưa có công thức hồi quy cho [tiny-attn](./docs/tiny-attn.md)?
   - [ ] Tại sao [công thức hồi quy rwkv-4](./docs/wkv-cuda.md#tai-sao-lai-dung-cong-thuc-moi) lại đổi sang formula (new)?
