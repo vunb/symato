@@ -36,7 +36,7 @@ class RWKV_RNN(torch.jit.ScriptModule):
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         # "emb.weight"                          => self.w.weight
         # "ln_out.weight"                       => self.w.ln_out.weight
-        # "head.weight"                         => self.head.weight
+        # "head.weight"                         => self.w.head.weight
         # "blocks.0.ln0.weight"                 => self.w.blocks[0].ln0.weight
         # "blocks.0.ln1.weight"                 => self.w.blocks[0].ln1.weight
         # "blocks.0.ln2.weight"                 => self.w.blocks[0].ln2.weight
