@@ -12,7 +12,22 @@ from pytorch_lightning.utilities import rank_zero_info
 class MyDataset(Dataset):
     def __init__(self, args):
         self.args = args
-        if args.data_type == "dummy":
+
+        if args.data_type == "numpy":
+            self.data = np.load(args.data_file).astype("int")
+            self.vocab_size = args.vocab_size
+            rank_zero_info("Current vocab size =", self.vocab_size, "(make sure it's correct)")
+            self.data_size = len(self.data)
+            rank_zero_info(f"Data has {self.data_size} tokens.")
+
+        elif args.data_type == "uint16":
+            self.data = np.fromfile(args.data_file, dtype=np.uint16).astype("int32").reshape(-1, args.my_sample_len)
+            self.vocab_size = args.vocab_size
+            rank_zero_info("Current vocab size =", self.vocab_size, "(make sure it's correct)")
+            self.data_size = self.data.shape[0]
+            rank_zero_info(f"Data has {self.data_size} samples.")
+
+        elif args.data_type == "dummy":
             rank_zero_info("Building dummy data...")
             self.data = ""
             for i in range(100000):
@@ -20,7 +35,7 @@ class MyDataset(Dataset):
                 bb = (i * i) % 10000
                 cc = aa + bb
                 self.data += f".{aa}+{bb}={cc}."
-        else:
+        else: # unicode
             self.data = open(args.data_file, "r", encoding=args.data_type).read()
 
             rank_zero_info("Building token list...")
@@ -63,7 +78,8 @@ class MyDataset(Dataset):
                 factor = (math.sqrt(5) - 1) / 2
                 factor = int(magic_prime * factor)
                 i = ((factor * ii * ii * ii) % magic_prime) * ctx_len
-                if data == self.data_pile: i += args.my_pile_shift
+                if data == self.data_pile:
+                    i += args.my_pile_shift
             else:
                 # cheat: pick a random spot in dataset
                 i = np.random.randint(0, self.data_size - req_len)
