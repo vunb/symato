@@ -6,8 +6,10 @@ TODOs
 - [x] Đọc hiểu và rút gọn [code training](./rwkv-v4neo)
 - [ ] rwkv-lm (vs nanogpt) với dataset âm tiết tiếng Việt
   - [x] Thiết kế symato vocab
-  - [x] Tạo min dataset vlc.xyz
-  - [ ] Thiết kế model và huấn luyện
+  - [x] Tạo mini dataset vlc.xyz
+  - [x] Huấn luyện symato-2816-vlc-23m
+  - [x] Chạy thử symato-2816-vlc-23m `./run.sh`
+  - [ ] Huấn luyện symato-16384-vlc
 - [ ] Toán
   - [ ] Chưa có công thức hồi quy cho [tiny-attn](./docs/tiny-attn.md)?
   - [ ] Tại sao [công thức hồi quy rwkv-4](./docs/wkv-cuda.md#tai-sao-lai-dung-cong-thuc-moi) lại đổi sang formula (new)?

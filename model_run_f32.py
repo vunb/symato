@@ -173,27 +173,25 @@ class RWKV_RNN(torch.jit.ScriptModule):
 ##########################################################################################################
 # Step 1: set model & config (use v4 to run your trained-from-scratch models. v4 and v4neo are compatible)
 ##########################################################################################################
+from symato import Symato
+from transformers import PreTrainedTokenizerFast
 
-# from transformers import PreTrainedTokenizerFast
 # TOKENIZER = PreTrainedTokenizerFast(tokenizer_file="20B_tokenizer.json")
-
 # args = types.SimpleNamespace()
 # args.vocab_size = 50277
 # args.ctx_len = 1024
-
 # args.MODEL_NAME = "RWKV-4-Pile-169M-20220807-8023.pth"
 # args.n_layer = 12
 # args.n_embd = 768
-
+#
 ## Có thể chạy với mô hình nặng hơn, 1.5 tỉ tham số
 # args.MODEL_NAME = "RWKV-4-Pile-1B5-20220929-ctx4096.pth"
 # args.n_layer = 24
 # args.n_embd = 2048
 
-from symato import Symato
 TOKENIZER = Symato()
 args = types.SimpleNamespace()
-args.MODEL_NAME = "./rwkv-v4neo/out/rwkv-15.pth"
+args.MODEL_NAME = "symato-2816-vlc-23m.pth"
 args.vocab_size = 2816
 args.ctx_len = 512
 args.n_layer = 6
@@ -206,7 +204,7 @@ args.n_embd = 512
 is_symato = isinstance(TOKENIZER, Symato)
 
 if is_symato:
-    context = "\nnghia vu nop thue "
+    context = "\nnghia vu nop thue"
     context = " ".join([f"{token}" for token in context.split()]) + " "
 else:
     context = "\nIn a shocking finding, scientist discovered a herd of dragons living in a remote "
@@ -225,7 +223,14 @@ def sample_logits(out, temperature=1.0, top_p_usual=0.8):
     probs[probs < cutoff] = 0 # bỏ đi những prob < cutoff
     if temperature != 1.0: probs = probs.pow(1.0 / temperature)
     probs = probs / np.sum(probs) # chuẩn hóa lại probs sao cho tổng = 1
-    return np.random.choice(a=len(probs), p=probs) # lấy mẫu
+    if not is_symato: return np.random.choice(a=len(probs), p=probs) # lấy mẫu
+    i = 0;
+    while i < 3:
+        tid = np.random.choice(a=len(probs), p=probs) # lấy mẫu
+        if not TOKENIZER.is_marktone(tid): return tid
+        i += 1
+    best_sym_id = 274 + out.numpy()[274:2808].argmax()
+    return best_sym_id
 
 ########################################################################################################
 # Step 3: generate more tokens given the prompt
@@ -242,19 +247,35 @@ for token_id in TOKENIZER.encode(context):
     out, init_state = model.forward(token_id, init_state)
     # Tự động bỏ dấu thanh nếu chưa có
     if is_symato and TOKENIZER.is_sym(token_id):
+        # TODO: tìm n-best marktone sequence
         best_marktone_id = 256 + out.numpy()[256:274].argmax()
         finetune_tids.append(best_marktone_id)
         out, init_state = model.forward(best_marktone_id, init_state)
 
-finetune_context = [TOKENIZER.decode(tid) for tid in finetune_tids]
-finetune_context = "".join(finetune_context)
+finetune_context = TOKENIZER.tids_to_utf8(finetune_tids)
 
 for TRIAL in range(NUM_TRIALS):
     print(f'\n\n--[ Lần thử {TRIAL} ]-----------------')
-    print(f'Hỏi: {context}\nĐáp: [ {finetune_context}] ', end="")
+    print(f'Hỏi: {context}\nĐáp: {finetune_context}', end="")
     state = init_state.clone() # clone() để giữ nguyên init_state cho lần TRIAL tiếp theo
-
+    cap_id = None
     for i in range(LENGTH_PER_TRIAL): # sinh thêm LENGTH_PER_TRIAL tokens nữa từ prompt đầu vào
         token_id = sample_logits(out, TEMPERATURE, top_p) # lấy mẫu ngẫu nhiên token tiếp theo
-        print(TOKENIZER.decode(token_id), end="", flush=True)
+        if not is_symato:
+            print(TOKENIZER.decode(token_id), end="", flush=True)
+        else:
+            if TOKENIZER.is_capitalized(token_id):
+                cap_id = token_id
+            else:
+                token = TOKENIZER.decode(token_id)
+                if TOKENIZER.is_sym(token_id):
+                  out, state = model.forward(token_id, state)
+                  best_marktone_id = 256 + out.numpy()[256:274].argmax()
+                  token = TOKENIZER.to_utf8(token_id, best_marktone_id)
+                  token_id = best_marktone_id
+                  if cap_id is not None:
+                    if TOKENIZER.is_sym_capitalized(cap_id): token = token.upper()
+                    else: token = token[0].upper() + token[1:]
+                    cap_id = None
+                print(token, end="", flush=True)
         out, state = model.forward(token_id, state)
