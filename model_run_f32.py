@@ -23,21 +23,44 @@ class RWKV_RNN(torch.jit.ScriptModule):
         self.args = args
         self.eval() # set torch to inference mode
         
-        # Load tham số từ file vào vào bộ nhớ (biến w)
+        # Load tham số từ file vào vào bộ nhớ và biến đổi cho phù hợp
         w = torch.load(args.MODEL_NAME, map_location='cpu')
         for k in w.keys():
             if      '.time_' in k: w[k] = w[k].squeeze() # (A,1,B,1) => (A,B)
             if '.time_decay' in k: w[k] = -torch.exp(w[k].float()) # e^negative = decay it's actually `e^{-e^x}``
-            else: w[k] = w[k].float() # convert to fp32 type
-            w[k].requires_grad = False # chỉ inference, nên không cần gradient
+            else: w[k] = w[k].float() # convert to f32 type
 
         # Gán tham số vào biến số mô hình
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        # Tên tham số (string)                     Biến số (namespace)
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        # "emb.weight"                          => self.w.weight
+        # "ln_out.weight"                       => self.w.ln_out.weight
+        # "head.weight"                         => self.head.weight
+        # "blocks.0.ln0.weight"                 => self.w.blocks[0].ln0.weight
+        # "blocks.0.ln1.weight"                 => self.w.blocks[0].ln1.weight
+        # "blocks.0.ln2.weight"                 => self.w.blocks[0].ln2.weight
+        # "blocks.0.att.time_first"             => self.w.blocks[0].att.time_first
+        # "blocks.0.att.time_decay"             ...
+        # "blocks.0.att.time_mix_k"
+        # "blocks.0.att.time_mix_v"
+        # "blocks.0.att.time_mix_r"
+        # "blocks.0.att.key.weight"
+        # "blocks.0.att.value.weight"
+        # "blocks.0.att.receptance.weight"
+        # "blocks.0.att.output.weight"
+        # "blocks.0.ffn.time_mix_k"
+        # "blocks.0.ffn.time_mix_r"
+        # "blocks.0.ffn.key.weight"
+        # "blocks.0.ffn.value.weight"
+        # "blocks.0.ffn.receptance.weight"
+        #                                       ... tiếp tục cho tới block thứ n ...
         self.w = types.SimpleNamespace()
         self.w.blocks = {}
         for k in w.keys():
-            parts = k.split('.') # Ví dụ k = "blocks.0.att.value.weight" => parts = ['block','0','att','value','weight']
-            last = parts.pop() # => last = weight; parts = ['block','0','att','value']
-            here = self.w # độ sâu hiện tại của tham số mô hình
+            parts = k.split('.') # Ví dụ k = "blocks.0.att.value.weight" => parts = ['block','0','ln0','weight']
+            last = parts.pop() # => last = "weight"; parts = ['block','0','ln0']
+            here = self.w
             for p in parts: # từng bước mở rộng namespace
                 if p.isdigit(): # tầng thứ p
                     p = int(p) # dùng [] vì here (w.blocks) là dict object {}
@@ -46,15 +69,15 @@ class RWKV_RNN(torch.jit.ScriptModule):
                 else: # dùng hasattr, setattr, getattr vì here là types.SimpleNamespace()
                     if not hasattr(here, p): setattr(here, p, types.SimpleNamespace())
                     here = getattr(here, p)
-            setattr(here, last, w[k]) # gán giá trị vào namespace cuối cùng => self.blocks[0].att.value.weight = w[k]
+            setattr(here, last, w[k]) # gán giá trị vào namespace cuối cùng => self.w.blocks[0].ln0.weight = w[k]
 
-    '''state[] để lưu trạng thái của rnn, mỗi tầng i ghi lại 5 trạng thái: 
-    i+0 = ffn_xx : token của bước channel-mixing trước 
-    i+1 = att_xx : token của bước time-mixing trước
-    i+2 = att_aa : exp moving avg của kv 
-    i+3 = att_bb : exp moving avg của k
-    i+4 = att_pp : use pp to stove exponent of aa and bb
-    '''
+
+    # state[] để lưu trạng thái của rnn, mỗi tầng i ghi lại 5 trạng thái: 
+    # i+0 = ffn_xx : token của bước channel-mixing trước 
+    # i+1 = att_xx : token của bước time-mixing trước
+    # i+2 = att_aa : exp moving avg của kv 
+    # i+3 = att_bb : exp moving avg của k
+    # i+4 = att_pp : use pp to stove exponent of aa and bb
     def layer_norm(self, x, w):
         return F.layer_norm(x, (self.args.n_embd,), weight=w.weight, bias=w.bias)
 
@@ -171,9 +194,7 @@ args.n_embd = 768
 # Step 2: set prompt & sampling stuffs
 ########################################################################################################
 
-context = "\nIn a shocking finding, scientist discovered a herd of dragons living in a remote, " #+ \
-    # "previously unexplored valley, in Tibet. Even more surprising to the researchers " + \
-    # "was the fact that the dragons spoke perfect Chinese."
+context = "\nIn a shocking finding, scientist discovered a herd of dragons living in a remote "
 
 NUM_TRIALS = 3
 LENGTH_PER_TRIAL = 120
@@ -204,7 +225,7 @@ for token_id in TOKENIZER.encode(context):
     out, init_state = model.forward(token_id, init_state)
 
 for TRIAL in range(NUM_TRIALS):
-    print(f'\n\n--[ Lần thử {TRIAL} ]-----------------', context)
+    print(f'\n\n--[ Lần thử {TRIAL} ]-----------------', context, end="")
     state = init_state.clone() # clone() để giữ nguyên init_state cho lần TRIAL tiếp theo
     for i in range(LENGTH_PER_TRIAL): # sinh thêm LENGTH_PER_TRIAL tokens nữa từ prompt đầu vào
         token_id = sample_logits(out, TEMPERATURE, top_p) # lấy mẫu ngẫu nhiên token tiếp theo
