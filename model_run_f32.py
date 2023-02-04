@@ -174,35 +174,50 @@ class RWKV_RNN(torch.jit.ScriptModule):
 # Step 1: set model & config (use v4 to run your trained-from-scratch models. v4 and v4neo are compatible)
 ##########################################################################################################
 
-from transformers import PreTrainedTokenizerFast
-TOKENIZER = PreTrainedTokenizerFast(tokenizer_file="20B_tokenizer.json")
+# from transformers import PreTrainedTokenizerFast
+# TOKENIZER = PreTrainedTokenizerFast(tokenizer_file="20B_tokenizer.json")
 
-args = types.SimpleNamespace()
-args.vocab_size = 50277
-args.ctx_len = 1024
+# args = types.SimpleNamespace()
+# args.vocab_size = 50277
+# args.ctx_len = 1024
 
-args.MODEL_NAME = "RWKV-4-Pile-169M-20220807-8023.pth"
-args.n_layer = 12
-args.n_embd = 768
+# args.MODEL_NAME = "RWKV-4-Pile-169M-20220807-8023.pth"
+# args.n_layer = 12
+# args.n_embd = 768
 
 ## Có thể chạy với mô hình nặng hơn, 1.5 tỉ tham số
 # args.MODEL_NAME = "RWKV-4-Pile-1B5-20220929-ctx4096.pth"
 # args.n_layer = 24
 # args.n_embd = 2048
 
+from symato import Symato
+TOKENIZER = Symato()
+args = types.SimpleNamespace()
+args.MODEL_NAME = "./rwkv-v4neo/out/rwkv-5.pth"
+args.vocab_size = 2816
+args.ctx_len = 512
+args.n_layer = 6
+args.n_embd = 512
+
 ########################################################################################################
 # Step 2: set prompt & sampling stuffs
 ########################################################################################################
 
-context = "\nIn a shocking finding, scientist discovered a herd of dragons living in a remote "
+is_symato = isinstance(TOKENIZER, Symato)
+
+if is_symato:
+    context = "\nnghia vu nop thue "
+    context = " ".join([f"{token}" for token in context.split()]) + " "
+else:
+    context = "\nIn a shocking finding, scientist discovered a herd of dragons living in a remote "
 
 NUM_TRIALS = 3
-LENGTH_PER_TRIAL = 120
+LENGTH_PER_TRIAL = 120 if not is_symato else 250
 TEMPERATURE = 1.0
 top_p = 0.8
 
 def sample_logits(out, temperature=1.0, top_p_usual=0.8):
-    probs = F.softmax(out, dim=-1).cpu().numpy()
+    probs = F.softmax(out, dim=-1).numpy()
     sorted_probs = np.sort(probs)
     cumulative_probs = np.cumsum(sorted_probs) # [1,2,3] => [1,3,6]
     idx = np.argmax(cumulative_probs > top_p_usual) # vì là mảng True, False nên trả về idx của True đầu tiên
@@ -219,14 +234,25 @@ def sample_logits(out, temperature=1.0, top_p_usual=0.8):
 print(f'\nUsing CPU. Loading {args.MODEL_NAME} ...')
 model = RWKV_RNN(args)
 
-out, init_state = None, None
+out, init_state, finetune_tids = None, None, []
 # Nhồi context (a.k.a prompt) vào mô hình
 for token_id in TOKENIZER.encode(context):
+    # print(">>>", token_id)
+    finetune_tids.append(token_id)
     out, init_state = model.forward(token_id, init_state)
+    if is_symato and TOKENIZER.is_sym(token_id):
+        best_marktone_id = 256 + out.numpy()[256:274].argmax()
+        finetune_tids.append(best_marktone_id)
+        out, init_state = model.forward(best_marktone_id, init_state)
+
+finetune_context = [TOKENIZER.decode(tid) for tid in finetune_tids]
+finetune_context = "".join(finetune_context)
 
 for TRIAL in range(NUM_TRIALS):
-    print(f'\n\n--[ Lần thử {TRIAL} ]-----------------', context, end="")
+    print(f'\n\n--[ Lần thử {TRIAL} ]-----------------')
+    print(f'prompt đầu vào không dấu thanh: {context}\nTự động bỏ dấu thanh: [ {finetune_context}] ', end="")
     state = init_state.clone() # clone() để giữ nguyên init_state cho lần TRIAL tiếp theo
+
     for i in range(LENGTH_PER_TRIAL): # sinh thêm LENGTH_PER_TRIAL tokens nữa từ prompt đầu vào
         token_id = sample_logits(out, TEMPERATURE, top_p) # lấy mẫu ngẫu nhiên token tiếp theo
         print(TOKENIZER.decode(token_id), end="", flush=True)
