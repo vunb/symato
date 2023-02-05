@@ -2,7 +2,7 @@ TODOs
 
 - [x] Tìm cách tokenize hợp với tiếng việt (xem [symato](#symato))
 - [x] Đọc hiểu rwkv ([xem rwkv.md](./docs/rwkv.md) hoặc [bản rút gọn](./docs/rwkv-illustrated.md))
-- [x] Viết lại rwkv inference engine [~200 loc in python](https://github.com/telexyz/symato/blob/main/model_run_f32.py)
+- [x] Viết lại rwkv inference engine [~200 loc in python](https://github.com/telexyz/symato/blob/1854f26d097ea616f8f76c054d0357f739d7c92c/model_run_f32.py)
 - [x] Đọc hiểu và rút gọn [code training](./rwkv-v4neo)
 - [ ] rwkv-lm (vs nanogpt) với dataset âm tiết tiếng Việt
   - [x] Thiết kế symato vocab
