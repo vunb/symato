@@ -1,12 +1,7 @@
 ''' Đây là bản rút gọn của 3 file `run.py`, `model_run.py`, và `utils.py` của từ https://github.com/BlinkDL/RWKV-LM/tree/main/RWKV-v4neo
 Bỏ đi phần code thừa, viết lại cho súc tích và dễ hiểu hơn. Mục đích để người mới bắt đầu hiểu được thuật toán forward
 của RWKV, cách mô hình sinh ra dữ liệu mới từ prompt đầu vào, qua đó nắm rõ kiến trúc của mô hình, và cách một mô hình
-ngôn ngữ hoạt động. Cách dùng:
-
-[ -f 20B_tokenizer.json ] || wget https://raw.githubusercontent.com/BlinkDL/RWKV-LM/main/RWKV-v4neo/20B_tokenizer.json
-[ -f RWKV-4-Pile-169M-20220807-8023.pth ] || wget https://huggingface.co/BlinkDL/rwkv-4-pile-169m/resolve/main/RWKV-4-Pile-169M-20220807-8023.pth
-python3 model_run_f32.py
-
+ngôn ngữ hoạt động. Cách dùng: `./run.sh`
 '''
 
 import numpy as np
@@ -176,22 +171,22 @@ class RWKV_RNN(torch.jit.ScriptModule):
 from symato import Symato
 from transformers import PreTrainedTokenizerFast
 
-# TOKENIZER = PreTrainedTokenizerFast(tokenizer_file="20B_tokenizer.json")
+# TOKENIZER = PreTrainedTokenizerFast(tokenizer_file="model/20B_tokenizer.json")
 # args = types.SimpleNamespace()
 # args.vocab_size = 50277
 # args.ctx_len = 1024
-# args.MODEL_NAME = "RWKV-4-Pile-169M-20220807-8023.pth"
+# args.MODEL_NAME = "model/RWKV-4-Pile-169M-20220807-8023.pth"
 # args.n_layer = 12
 # args.n_embd = 768
 #
 ## Có thể chạy với mô hình nặng hơn, 1.5 tỉ tham số
-# args.MODEL_NAME = "RWKV-4-Pile-1B5-20220929-ctx4096.pth"
+# args.MODEL_NAME = "model/RWKV-4-Pile-1B5-20220929-ctx4096.pth"
 # args.n_layer = 24
 # args.n_embd = 2048
 
 TOKENIZER = Symato()
 args = types.SimpleNamespace()
-args.MODEL_NAME = "symato-2816-vlc-23m.pth"
+args.MODEL_NAME = "model/symato-2816-vlc-23m.pth"
 args.vocab_size = 2816
 args.ctx_len = 512
 args.n_layer = 6
@@ -252,7 +247,7 @@ for token_id in TOKENIZER.encode(context):
         finetune_tids.append(best_marktone_id)
         out, init_state = model.forward(best_marktone_id, init_state)
 
-finetune_context = TOKENIZER.tids_to_utf8(finetune_tids)
+finetune_context = TOKENIZER.tids_to_utf8(finetune_tids) if is_symato else context
 
 for TRIAL in range(NUM_TRIALS):
     print(f'\n\n--[ Lần thử {TRIAL} ]-----------------')
