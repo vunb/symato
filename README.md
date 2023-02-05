@@ -4,15 +4,16 @@ TODOs
 - [x] Đọc hiểu rwkv ([xem rwkv.md](./docs/rwkv.md) hoặc [bản rút gọn](./docs/rwkv-illustrated.md))
 - [x] Viết lại rwkv inference engine [~200 loc in python](https://github.com/telexyz/symato/blob/1854f26d097ea616f8f76c054d0357f739d7c92c/model_run_f32.py)
 - [x] Đọc hiểu và rút gọn [code training](./rwkv-v4neo)
-- [ ] rwkv-lm (vs nanogpt) với dataset âm tiết tiếng Việt
+- [ ] rwkv-lm với dataset âm tiết tiếng Việt
   - [x] Thiết kế symato vocab
   - [x] Tạo mini dataset vlc.xyz
   - [x] Huấn luyện symato-2816-vlc-23m
   - [x] Chạy symato-2816-vlc-23m `./run.sh`
-  - [ ] Huấn luyện symato-2816-vlc-nanogpt
   - [ ] Huấn luyện symato-16384-vlc
-- [ ] Thêm các tricks như token-shift, receptance từ rwkv vào nanoGPT và đo lường độ hiệu quả
-- [ ] Viết miniRWKV, train = công thức GPT, giải mã bằng RNN
+- [ ] nanogpt với dataset âm tiết tiếng Việt
+  - [ ] Huấn luyện symato-2816-vlc-nanogpt
+  - [ ] Thêm các tricks như token-shift, receptance từ rwkv vào nanoGPT và đo lường độ hiệu quả
+- [ ] Viết miniRWKV, train = công thức gpt, giải mã bằng công thức rnn, so sánh khác biệt!
 - [ ] Toán
   - [ ] Chưa có công thức hồi quy cho [tiny-attn](./docs/tiny-attn.md)?
   - [ ] Tại sao [công thức hồi quy rwkv-4](./docs/wkv-cuda.md#tai-sao-lai-dung-cong-thuc-moi) lại đổi sang formula (new)?
