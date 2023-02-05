@@ -131,7 +131,7 @@ __Symato tknz, vocab_size 2816__
 # 23.4 M    Total params
 ```
 
-Note: Cùng train 5 epochs, phobert tknz 48m params loss 0.4, symato tknz 23m params loss 0.1
+Note: train 20 epochs trên cùng dataset, phobert tknz 48m params loss 0.14, symato tknz 23m params loss 0.04 (3.5x better)
 
 ## Không đủ dữ liệu tiếng Việt để huấn luyện?
 
