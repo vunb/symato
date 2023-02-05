@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-import tone, utils
+from . import tone, utils
 Tone = tone.Tone
 
 

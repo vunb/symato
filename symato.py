@@ -1,5 +1,5 @@
 from symato_dict import SYMATO_MARKTONES, SYMATO_SYMS
-import sys; sys.path.append('bogo'); import core as bogo
+import bogo
 
 '''
 2816 vocab, `u16` type:
@@ -26,7 +26,7 @@ class Symato:
 	def vocab_size(self): return 2816
 
 	def to_utf8(self, sym_id, marktone_id):
-		return bogo.process_sequence(self.itos[sym_id] + self.itos[marktone_id][1:])
+		return bogo.core.process_sequence(self.itos[sym_id] + self.itos[marktone_id][1:])
 
 	def tids_to_utf8(self, tids):
 		i, n = -1, len(tids) - 1

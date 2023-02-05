@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
-from validation import is_valid_combination
-import utils, tone, mark
+from .validation import is_valid_combination
+from . import utils, tone, mark
 import logging, sys, string
 
 

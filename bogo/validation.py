@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 import collections
-import tone, mark, utils
+from . import tone, mark, utils
 Tone = tone.Tone
 
 
