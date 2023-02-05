@@ -61,12 +61,4 @@ add-marktone: [ nghia|x vu|j nop|zj thue|zs ] |zf thue|zs cua|r nguoi|wf nop|zj 
 2. ^chinh|s phu|r quy| ddinh|j chi| tiet|zs ^ddieu|zf nay|f. 
 
 ^ddieu|zf 113. ^mien|zx thue|zs ddoi|zs voi|ws doanh| nghiep|zj 
-
---[ Lần thử 2 ]-----------------
-prompt: nghia vu nop thue
-add-marktone: [ nghia|x vu|j nop|zj thue|zs ]  so|zs tien|zf thue|zs phai|r nop|zj cua|r nguoi|wf nop|zj thue|zs trong| pham|j vi| va|f thoi|wf han|j theo| quy| ddinh|j cua|r ^luat|zj ^hai|r quan| thi|f dduoc|wj xu|wr ly|s theo| quy| ddinh|j cua|r phap|s luat|zj ve|zf thue|zs. 
-
-2. ^nguoi|wf nop|zj thue|zs bi|j an|zs ddinh|j so|zs tien|zf thue|zs phai|r nop|zj theo| thoi|wf han|j quy| ddinh|j tai|j khoan|r 1 ^ddieu|zf nay|f. 
-
-3. ^thoi|wf han|j an|zs ddinh|j thue|zs ddoi|zs voi|ws cac|s truong|wf hop|wj khong|z ap|s dung|j theo| quy| ddinh|j cua|r ^luat|zj ^thue|zs cao| hon|w so|z
 ```

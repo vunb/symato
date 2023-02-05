@@ -20,6 +20,9 @@ TODOs
 
 https://user-images.githubusercontent.com/8133/216773986-3d26d73a-9206-45b1-ae8f-d5d8fdb01199.mp4
 
+__Symato có thể làm hai việc một lúc, tự động thêm dấu thanh và sinh văn bản__
+![](./docs/files/symato.jpg)
+
 - - -
 
 __Thiết lập các thử nghiệm theo mô hình ngôn ngữ [RWKV](./docs/rwkv.md) với bộ dữ liệu càng thuần Việt càng tốt, tập trung vào âm tiết tiếng Việt, để làm nhẹ bộ tham số và làm nổi bật đặc trưng của tiếng Việt__. Và trả lời các câu hỏi dưới đây:
@@ -99,7 +102,7 @@ Tóm lại symato có 3 bộ vocabs:
 
 ### vocab_size ảnh hưởng tới mô hình như thế nào?
 
-Dưới đây là 2 mô hình có kiến trúc giống nhau, chỉ khác nhau ở bộ từ vựng (vocab), mô hình đầu dùng tokenizer PhoBert vocab_size ~64k, mô hình sau dùng tokenizer Symato vocab_size 2816. vocab_size lớn làm phình emb và head lên rất rất nhiều. Khiến co số params của blocks phải thu lại còn 1/3 để mô hình có thể chạy được trên RTX3050ti 4G VRAM. Mặc dù số lượng params đã tăng lên gấp đôi!
+Dưới đây là 2 mô hình có kiến trúc giống nhau, chỉ khác nhau ở bộ từ vựng (vocab), mô hình đầu dùng tokenizer PhoBert vocab_size ~64k, mô hình sau dùng tokenizer Symato vocab_size 2816. vocab_size lớn làm phình emb và head lên rất rất nhiều. Khiến số params của blocks chính phải thu lại còn 1/3 để mô hình có thể chạy được trên RTX3050ti 4G VRAM. Mặc dù số lượng params đã tăng lên gấp đôi! (tốn params không đúng chỗ)
 
 __PhoBert tknz, vocab_size ~64k__
 ```
