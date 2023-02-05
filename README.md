@@ -97,6 +97,40 @@ Tóm lại symato có 3 bộ vocabs:
 
 `symato-32768` có vocab_size là 32k đạt tới vocab_size mà các LLM hay dùng (khoảng 50k, cá biệt bloom dùng ~500k vocab_size).
 
+### vocab_size ảnh hưởng tới mô hình như thế nào?
+
+Dưới đây là 2 mô hình có kiến trúc giống nhau, chỉ khác nhau ở bộ từ vựng (vocab), mô hình đầu dùng tokenizer PhoBert vocab_size ~64k, mô hình sau dùng tokenizer Symato vocab_size 2816. vocab_size lớn làm phình emb và head lên rất rất nhiều. Khiến co số params của blocks phải thu lại còn 1/3 để mô hình có thể chạy được trên RTX3050ti 4G VRAM. Mặc dù số lượng params đã tăng lên gấp đôi!
+
+__PhoBert tknz, vocab_size ~64k__
+```
+# --------------------------------------
+#   | Name   | Type       | Params
+# --------------------------------------
+# 0 | emb    | Embedding  | 20.6 M
+# 1 | blocks | ModuleList | 6.7 M
+# 2 | ln_out | LayerNorm  | 640
+# 3 | head   | Linear     | 20.6 M
+# --------------------------------------
+# 47.8 M    Trainable params
+# 0         Non-trainable params
+# 47.8 M    Total params
+```
+
+__Symato tknz, vocab_size 2816__
+```
+# --------------------------------------
+#   | Name   | Type       | Params
+# --------------------------------------
+# 0 | emb    | Embedding  | 1.4 M
+# 1 | blocks | ModuleList | 20.5 M
+# 2 | ln_out | LayerNorm  | 1.0 K
+# 3 | head   | Linear     | 1.4 M
+# --------------------------------------
+# 23.4 M    Trainable params
+# 0         Non-trainable params
+# 23.4 M    Total params
+```
+
 ## Không đủ dữ liệu tiếng Việt để huấn luyện?
 
 ![](docs/files/gpt-00.jpg)
