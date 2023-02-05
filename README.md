@@ -9,7 +9,7 @@ TODOs
   - [x] Tạo mini dataset vlc.xyz
   - [x] Huấn luyện symato-2816-vlc-23m
   - [x] Chạy symato-2816-vlc-23m `./run.sh`
-  - [ ] Huấn luyện symato-16384-vlc
+  - [ ] Cải tiến Symato tknz giảm token space giữa 2 âm tiết
 - [ ] nanogpt với dataset âm tiết tiếng Việt
   - [ ] Huấn luyện symato-2816-vlc-nanogpt
   - [ ] Thêm các tricks như token-shift, receptance từ rwkv vào nanoGPT và đo lường độ hiệu quả
@@ -130,6 +130,8 @@ __Symato tknz, vocab_size 2816__
 # 0         Non-trainable params
 # 23.4 M    Total params
 ```
+
+Note: Cùng train 5 epochs, phobert tknz 48m params loss 0.4, symato tknz 23m params loss 0.1
 
 ## Không đủ dữ liệu tiếng Việt để huấn luyện?
 
