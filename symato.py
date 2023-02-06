@@ -30,28 +30,28 @@ class Symato:
 
 	def tids_to_utf8(self, tids):
 		i, n = -1, len(tids) - 1
-		str = ""; capitalized_tid = None
+		str = ""; cap_id = None
 		prev_tid = 0
 		while i < n:
 			i += 1
 			tid = tids[i]
 
 			if self.is_capitalized(tid):
-				capitalized_tid = tid
+				cap_id = tid
 			else:
 				token = None
-				if self.is_sym(tid) and i < n - 1:
-					mtid = tids[i + 1]
+				if self.is_sym(tid):
+					mtid = tids[i + 1] if i <= n else None
 					if self.is_marktone(mtid):
 						token = self.to_utf8(tid, mtid)
 						i += 1
 				else:
 					token = self.decode(tid)
 
-				if capitalized_tid != None:
-					if self.is_sym_capitalized(capitalized_tid): token = token.upper()
+				if cap_id != None:
+					if self.is_sym_capitalized(cap_id): token = token.upper()
 					else: token = token[0].upper() + token[1:]
-					capitalized_tid = None
+					cap_id = None
 				
 				if self.is_sym(tid) and self.is_sym(prev_tid):
 					str += " " # thêm space giữa 2 syllables
@@ -85,20 +85,22 @@ class Symato:
 		return self.itos[tid] if tid > 255 else chr(tid)
 
 
-	def encode(self, a, maxx=None):
-		tids = self.encode_(a, maxx)
+	def encode(self, a, maxx=None, rev=False):
+		tids = self.encode_(a, maxx, rev)
 		mtid = len(tids) - 1
 		compact_tids = []
 		# Loại bỏ space giữa marktone và sym để tiết kiệm ctx_len
 		for i, tid in enumerate(tids):
 			if tid == 32: # space
-				if   i > 0 and self.is_marktone(tids[i - 1]): # previous tid is marktone
-					if i < mtid and self.is_sym(tids[i + 1]): # next tid is a sym
-						continue
+				if i > 0 and self.is_marktone(tids[i - 1]): # previous tid is marktone
+					if i < mtid:
+						x = tids[i + 1]
+						if self.is_capitalized(x) or self.is_sym(x): # next tid is a sym or a cap
+							continue
 			compact_tids.append(tid)
 		return compact_tids
 
-	def encode_(self, a, maxx=None):
+	def encode_(self, a, maxx=None, rev=False):
 		if isinstance(a, str): a = bytes(a, "utf8")
 		b, e = 0, len(a)
 		if maxx is None: maxx = e
@@ -110,7 +112,6 @@ class Symato:
 				n = b + 1
 				while a[n] != 16: n += 1
 				s = str(a[b+1:n], "utf8")
-				# print(s)
 				if s[0] == '^':
 					if s[1] == '^':
 						tids.append(self.stoi["^^"])
@@ -118,25 +119,53 @@ class Symato:
 					else:
 						tids.append(self.stoi["^"])
 						s = s[1:]
-				tokens = s.split("|")
-				tids.append(self.stoi[tokens[0]])
-				if len(tokens) > 1:
-					tids.append(self.stoi["|" + tokens[1]])
 
+				idx = s.find("|")
+				if idx > -1:
+					sym_id = self.stoi[s[0:idx]]
+					marktone_id = self.stoi[s[idx:]]
+				else:
+					sym_id = self.stoi[s]
+					marktone_id = None
+				if rev:
+					if len(tids) > 0 and self.is_capitalized(tids[-1]):
+						tmp = tids[-1]
+						tids[-1] = marktone_id
+						tids.append(sym_id)
+						tids.append(tmp)
+					else:
+						tids.append(marktone_id)
+						tids.append(sym_id)
+				else:
+					tids.append(sym_id)
+					if marktone_id is not None: tids.append(marktone_id)
 				b = n + 1
 			else:
 				tids.append(c)
 				b += 1
 		a = None
+		if rev: tids.reverse()
 		return tids
 
 	def tokenize(self, filename, maxx=None):
 		return self.encode(open(filename,"rb").read(), maxx)
 
 
+s = Symato()
+a = "a| ^a|f  ^^a|s"
+tids = s.encode(a)
+assert tids == [274, 256, 2815, 274, 258, 32, 32, 2814, 274, 257]
+assert s.tids_to_utf8(tids) == "a À  Á"
+tids = s.encode(a,rev=True)
+assert tids == [2814, 274, 257, 32, 32, 2815, 274, 258, 274, 256]
+assert s.tids_to_utf8(tids) == "Á  À a"
 # '''
 # s = Symato()
-# tids = s.encode("^quyen|zf luc|wj cua|r ong|z trum|f xa|x hoi|zj dden| (^ky|f 3): ^bi| kich|j gia| ddinh|f.", 500)
+# a = "a| ^quyen|zf luc|wj cua|r ong|z trum|f xa|x hoi|zj dden| (^ky|f 3): ^bi| kich|j gia| ddinh|f."
+# tids = s.encode(a)
+# print(tids)
+# print(s.tids_to_utf8(tids))
+# tids = s.encode(a,rev=True)
 # print(tids)
 # print(s.tids_to_utf8(tids))
 # print(s.ids_to_tokens([2815, 2648, 273, 32, 2814, 1487, 256]))
