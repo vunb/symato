@@ -108,7 +108,7 @@ Tóm lại symato có 3 bộ vocabs:
 2. `symato-16384` gồm bộ từ vựng `symato-2816` cộng thêm 13568 âm tiết tiếng Việt có dấu viết xuất hiện thường xuyên nhất trong dữ liệu huấn luyện
 3. `symato-32768` gồm bộ từ vựng `symato-16384` cộng thêm 16384 các cặp âm tiết tiếng Việt có dấu xuất hiện thường xuyên nhất trong dữ liệu huấn luyện
 
-`symato-32768` có vocab_size là 32k đạt tới vocab_size mà các LLM hay dùng (khoảng 50k, cá biệt bloom dùng ~500k vocab_size).
+4. `symato-2816+` gồm symato-2816 và các tokens khác xây dựng bằng BPE, độ lớn vocab tùy ý. Tối ưu cho dataset đc huấn luyện.
 
 ### vocab_size ảnh hưởng tới mô hình như thế nào?
 
