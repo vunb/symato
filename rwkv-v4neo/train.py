@@ -49,6 +49,7 @@ if __name__ == "__main__":
 
     parser = ArgumentParser()
 
+    parser.add_argument("--data_order", default="", type=str)
     parser.add_argument("--load_model", default="", type=str)  # full path, with .pth
     parser.add_argument("--wandb", default="", type=str)  # wandb project name. if "" then don't use wandb
     parser.add_argument("--proj_dir", default="out", type=str)
