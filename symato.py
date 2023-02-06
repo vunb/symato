@@ -147,8 +147,8 @@ class Symato:
 		if rev: tids.reverse()
 		return tids
 
-	def tokenize(self, filename, maxx=None):
-		return self.encode(open(filename,"rb").read(), maxx)
+	def tokenize(self, filename, maxx=None, rev=False):
+		return self.encode(open(filename,"rb").read(), maxx, rev)
 
 
 s = Symato()

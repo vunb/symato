@@ -1,5 +1,5 @@
 # Symato tknz
-python3 train.py --load_model "" --wandb "" --proj_dir "out" \
+python3 train.py --load_model "" --wandb "vlc-rev" --proj_dir "out" \
 --data_file "../../data/vlc.xyz" --data_type "symato" \
 --ctx_len 640 --epoch_steps 2000 --epoch_count 20 --epoch_begin 0 --epoch_save 5 \
 --micro_bsz 12 --n_layer 6 --n_embd 512 --pre_ffn 0 --head_qk 0 \
