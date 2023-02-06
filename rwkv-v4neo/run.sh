@@ -1,9 +1,9 @@
 # Symato tknz
-python3 train.py --load_model "" --wandb "" --proj_dir "out" \
+python3 train.py --load_model "./out/vlc/rwkv-25.pth" --wandb "" --proj_dir "out" \
 --data_file "../../data/vlc.xyz" --data_type "symato" \
---ctx_len 512 --epoch_steps 2000 --epoch_count 20 --epoch_begin 0 --epoch_save 5 \
---micro_bsz 16 --n_layer 6 --n_embd 512 --pre_ffn 0 --head_qk 0 \
---lr_init 8e-4 --lr_final 1e-5 --warmup_steps 0 --beta1 0.9 --beta2 0.99 --adam_eps 1e-8 \
+--ctx_len 640 --epoch_steps 2000 --epoch_count 20 --epoch_begin 0 --epoch_save 5 \
+--micro_bsz 12 --n_layer 6 --n_embd 512 --pre_ffn 0 --head_qk 0 \
+--lr_init 2e-4 --lr_final 1e-5 --warmup_steps 0 --beta1 0.9 --beta2 0.99 --adam_eps 1e-8 \
 --accelerator gpu --devices 1 --precision bf16 --strategy ddp_find_unused_parameters_false --grad_cp 0
 # --------------------------------------
 #   | Name   | Type       | Params

@@ -31,6 +31,7 @@ class Symato:
 	def tids_to_utf8(self, tids):
 		i, n = -1, len(tids) - 1
 		str = ""; capitalized_tid = None
+		prev_tid = 0
 		while i < n:
 			i += 1
 			tid = tids[i]
@@ -51,7 +52,11 @@ class Symato:
 					if self.is_sym_capitalized(capitalized_tid): token = token.upper()
 					else: token = token[0].upper() + token[1:]
 					capitalized_tid = None
+				
+				if self.is_sym(tid) and self.is_sym(prev_tid):
+					str += " " # thêm space giữa 2 syllables
 				str += token
+				prev_tid = tid
 
 		return str
 
@@ -79,7 +84,21 @@ class Symato:
 	def decode(self, tid):
 		return self.itos[tid] if tid > 255 else chr(tid)
 
+
 	def encode(self, a, maxx=None):
+		tids = self.encode_(a, maxx)
+		mtid = len(tids) - 1
+		compact_tids = []
+		# Loại bỏ space giữa marktone và sym để tiết kiệm ctx_len
+		for i, tid in enumerate(tids):
+			if tid == 32: # space
+				if   i > 0 and self.is_marktone(tids[i - 1]): # previous tid is marktone
+					if i < mtid and self.is_sym(tids[i + 1]): # next tid is a sym
+						continue
+			compact_tids.append(tid)
+		return compact_tids
+
+	def encode_(self, a, maxx=None):
 		if isinstance(a, str): a = bytes(a, "utf8")
 		b, e = 0, len(a)
 		if maxx is None: maxx = e
@@ -117,8 +136,10 @@ class Symato:
 
 # '''
 # s = Symato()
+# tids = s.encode("^quyen|zf luc|wj cua|r ong|z trum|f xa|x hoi|zj dden| (^ky|f 3): ^bi| kich|j gia| ddinh|f.", 500)
+# print(tids)
+# print(s.tids_to_utf8(tids))
 # print(s.ids_to_tokens([2815, 2648, 273, 32, 2814, 1487, 256]))
-# print(s.encode("^quyen|zf luc|wj cua|r ong|z trum|f xa|x hoi|zj dden| (^ky|f 3): ^bi| kich|j gia| ddinh|f.", 500))
 # tids = [32, 66, 79, 84, 32, 84, 50, 46, 32, 10, 104, 116, 116, 112, 115, 58, 47, 47, 118, 110, 101, 120, 112, 114, 101, 115, 115, 46, 110, 101, 116, 47, 99, 100, 99, 45, 2418, 256, 45, 725, 256, 45, 116, 104, 97, 112, 45, 725, 256, 45, 547, 256, 45, 52, 50, 57, 57, 54, 50, 48, 46, 104, 116, 109, 108, 32, 10]
 # print("".join(s.ids_to_tokens(tids)))
 # tids = [2814, 2535, 267, 32, 2814, 645, 273, 32, 2814, 2249, 265, 32, 2814, 1340, 272, 32, 2814, 1893, 257, 32, 2814, 278, 268, 32, 2814, 1166, 268, 32, 2814, 1671, 273, 32, 2814, 1668, 264, 44, 32, 2814, 524, 256, 32, 2814, 681, 272, 32, 2814, 1666, 270, 58, 32, 10, 594, 261, 32, 1557, 268, 32, 1421, 269, 32, 2553, 262, 32, 2814, 2536, 256, 32, 2371, 259, 32, 2265, 264, 32, 885, 257, 32, 1656, 268, 32, 2814, 1656, 272, 32, 2410, 269, 32, 2804, 269, 32, 10, 10, 2814, 330, 259, 32, 2814, 2023, 256, 32, 2814, 1340, 272, 32, 2814, 1893, 257, 32, 2814, 278, 268, 32, 2814, 1671, 273, 32, 2814, 1668, 264, 58, 32, 10, 75, 104, 117, 225, 186, 175, 110, 103, 32, 110, 198, 176, 97, 110, 32, 110, 117, 196, 131, 110, 32, 10, 10, 2814, 330, 259, 32, 2814, 2023, 256, 32, 2814, 1340, 272, 32, 2814, 1892, 257, 32, 2814, 278, 268, 32, 2814, 681, 272, 32, 2814, 1666, 270, 32, 2814, 2665, 263, 32, 2814, 2411, 269, 32, 2814, 281, 256, 58, 32, 10, 89, 101, 110, 44, 32, 84, 105, 101, 110, 32, 98, 117, 111, 110, 103, 32, 98, 111, 111, 109, 32, 10, 10, 45, 32, 45, 32, 45, 32, 10, 2815, 964, 256, 32, 112, 104, 117, 99, 32, 1283, 256, 32, 2316, 256, 32, 2615, 256, 32, 121, 101, 110, 32, 2418, 256, 32, 1127, 256, 32, 2713, 256, 32, 1738, 256, 32, 846, 256, 32, 2316, 256, 32, 692, 256, 32, 2615, 256, 32, 1283, 256, 32, 99, 104, 117, 99, 32, 2316, 256, 32, 2238, 256, 32, 1006, 256, 32, 2311, 256, 32, 117, 111, 99, 32, 1656, 268, 32, 274, 256, 32, 10, 2815, 1340, 256, 32, 1787, 256, 32, 547, 256, 32, 771, 256, 32, 1787, 256, 32, 2478, 268, 32, 681, 256, 32, 116, 104, 117, 111, 110, 103, 32, 2023, 256, 32, 2627, 256, 32]
