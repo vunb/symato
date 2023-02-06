@@ -187,9 +187,9 @@ from transformers import PreTrainedTokenizerFast
 TOKENIZER = Symato()
 args = types.SimpleNamespace()
 # args.MODEL_NAME = "model/symato-2816-vlc-23m.pth"
-args.MODEL_NAME = "rwkv-v4neo/out/rwkv-5.pth"
+args.MODEL_NAME = "rwkv-v4neo/out/rwkv-10.pth"
 args.vocab_size = 2816
-args.ctx_len = 512
+args.ctx_len = 640
 args.n_layer = 6
 args.n_embd = 512
 
