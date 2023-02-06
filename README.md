@@ -11,11 +11,19 @@ TODOs
   - [x] Chạy symato-2816-vlc-23m `./run.sh`
   - [x] Cải tiến Symato tknz giảm token space giữa 2 âm tiết
   - [x] __Tăng context length ~2x loss giảm ~1/2 trong 10 epochs đầu__
+
 - [ ] Tìm / build một dataset thuần Việt đủ lớn (khoảng 300MB tới 1GB)
+  - [ ] Tìm kiếm https://huggingface.co/datasets?language=language:vi
+  - [x] news-corpus OK ~4Gb https://huggingface.co/datasets/bigscience-data/roots_vi_binhvq_news_corpus
+
+- [ ] Build mô hình 2 chiều xuôi ngược chỉ để bổ xung marktone
+
 - [ ] nanogpt với dataset âm tiết tiếng Việt
   - [ ] Huấn luyện symato-2816-vlc-nanogpt
   - [ ] Thêm các tricks như token-shift, receptance từ rwkv vào nanoGPT và đo lường độ hiệu quả
+
 - [ ] Viết miniRWKV, train = công thức gpt, giải mã bằng công thức rnn, so sánh khác biệt!
+
 - [ ] Toán
   - [ ] Chưa có công thức hồi quy cho [tiny-attn](./docs/tiny-attn.md)?
   - [ ] Tại sao [công thức hồi quy rwkv-4](./docs/wkv-cuda.md#tai-sao-lai-dung-cong-thuc-moi) lại đổi sang formula (new)?
