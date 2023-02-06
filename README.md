@@ -9,7 +9,9 @@ TODOs
   - [x] Tạo mini dataset vlc.xyz
   - [x] Huấn luyện symato-2816-vlc-23m
   - [x] Chạy symato-2816-vlc-23m `./run.sh`
-  - [ ] Cải tiến Symato tknz giảm token space giữa 2 âm tiết
+  - [x] Cải tiến Symato tknz giảm token space giữa 2 âm tiết
+  - [x] __Tăng context length ~2x loss giảm ~1/2__
+- [ ] Tìm / build một dataset thuần Việt đủ lớn (300MB - 1GB)
 - [ ] nanogpt với dataset âm tiết tiếng Việt
   - [ ] Huấn luyện symato-2816-vlc-nanogpt
   - [ ] Thêm các tricks như token-shift, receptance từ rwkv vào nanoGPT và đo lường độ hiệu quả
