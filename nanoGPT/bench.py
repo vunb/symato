@@ -57,7 +57,7 @@ gptconf = GPTConfig(
 model = GPT(gptconf)
 model.to(device)
 
-optimizer = model.configure_optimizers(weight_decay=1e-2, learning_rate=1e-4, betas=(0.9, 0.95))
+optimizer = model.configure_optimizers(weight_decay=1e-2, learning_rate=1e-4, betas=(0.9, 0.95), device_type=device_type)
 
 if compile:
     print("Compiling model...")
@@ -111,5 +111,7 @@ else:
             print(f"{k}/{num_steps} loss: {lossf:.4f}")
         torch.cuda.synchronize()
         t1 = time.time()
+        dt = t1-t0
+        mfu = model.estimate_mfu(batch_size * 1 * num_steps, dt)
         if stage == 1:
-            print(f"time per iteration: {(t1-t0)/num_steps*1000:.4f}ms")
+            print(f"time per iteration: {dt/num_steps*1000:.4f}ms, MFU: {mfu*100:.2f}%")
