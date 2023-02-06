@@ -5,7 +5,7 @@ ngôn ngữ hoạt động. Cách dùng: `./run.sh`
 '''
 
 import numpy as np
-import os, types, torch
+import random, types, torch
 from torch.nn import functional as F
 
 ########################################################################################################
@@ -186,7 +186,8 @@ from transformers import PreTrainedTokenizerFast
 
 TOKENIZER = Symato()
 args = types.SimpleNamespace()
-args.MODEL_NAME = "model/symato-2816-vlc-23m.pth"
+# args.MODEL_NAME = "model/symato-2816-vlc-23m.pth"
+args.MODEL_NAME = "rwkv-v4neo/out/rwkv-5.pth"
 args.vocab_size = 2816
 args.ctx_len = 512
 args.n_layer = 6
@@ -199,7 +200,12 @@ args.n_embd = 512
 is_symato = isinstance(TOKENIZER, Symato)
 
 if is_symato:
-    context = "\nnghia vu nop thue"
+    context = random.choice([
+        "nghia vu nop thue", 
+        "quyen loi cong dan", 
+        "bo luat dan su viet nam gom nhung gi",
+        "ai duoc quyen mua nha o viet nam"
+    ])
     context = " ".join([f"{token}" for token in context.split()]) + " "
 else:
     context = "\nIn a shocking finding, scientist discovered a herd of dragons living in a remote "
@@ -211,6 +217,7 @@ top_p = 0.8
 
 def sample_logits(out, temperature=1.0, top_p_usual=0.8):
     probs = F.softmax(out, dim=-1).numpy()
+    if is_symato: probs[256:274] = 0 # ko ngẫu nhiên sinh marktone
     sorted_probs = np.sort(probs)
     cumulative_probs = np.cumsum(sorted_probs) # [1,2,3] => [1,3,6]
     idx = np.argmax(cumulative_probs > top_p_usual) # vì là mảng True, False nên trả về idx của True đầu tiên
@@ -218,14 +225,7 @@ def sample_logits(out, temperature=1.0, top_p_usual=0.8):
     probs[probs < cutoff] = 0 # bỏ đi những prob < cutoff
     if temperature != 1.0: probs = probs.pow(1.0 / temperature)
     probs = probs / np.sum(probs) # chuẩn hóa lại probs sao cho tổng = 1
-    if not is_symato: return np.random.choice(a=len(probs), p=probs) # lấy mẫu
-    i = 0;
-    while i < 3:
-        tid = np.random.choice(a=len(probs), p=probs) # lấy mẫu
-        if not TOKENIZER.is_marktone(tid): return tid
-        i += 1
-    best_sym_id = 274 + out.numpy()[274:2808].argmax()
-    return best_sym_id
+    return np.random.choice(a=len(probs), p=probs) # lấy mẫu
 
 ########################################################################################################
 # Step 3: generate more tokens given the prompt
@@ -253,7 +253,7 @@ for TRIAL in range(NUM_TRIALS):
     print(f'\n\n--[ Lần thử {TRIAL} ]-----------------')
     print(f'Hỏi: {context}\nĐáp: {finetune_context}', end="")
     state = init_state.clone() # clone() để giữ nguyên init_state cho lần TRIAL tiếp theo
-    cap_id = None
+    cap_id, prev_tid = None, 0
     for i in range(LENGTH_PER_TRIAL): # sinh thêm LENGTH_PER_TRIAL tokens nữa từ prompt đầu vào
         token_id = sample_logits(out, TEMPERATURE, top_p) # lấy mẫu ngẫu nhiên token tiếp theo
         if not is_symato:
@@ -264,14 +264,17 @@ for TRIAL in range(NUM_TRIALS):
             else:
                 token = TOKENIZER.decode(token_id)
                 if TOKENIZER.is_sym(token_id):
-                  out, state = model.forward(token_id, state)
-                  best_marktone_id = 256 + out.numpy()[256:274].argmax()
-                  token = TOKENIZER.to_utf8(token_id, best_marktone_id)
-                  token_id = best_marktone_id
-                  if cap_id is not None:
-                    if TOKENIZER.is_sym_capitalized(cap_id): token = token.upper()
-                    else: token = token[0].upper() + token[1:]
-                    cap_id = None
+                    out, state = model.forward(token_id, state)
+                    best_marktone_id = 256 + out.numpy()[256:274].argmax()
+                    token = TOKENIZER.to_utf8(token_id, best_marktone_id)
+                    token_id = best_marktone_id
+                    if cap_id is not None:
+                        if TOKENIZER.is_sym_capitalized(cap_id): token = token.upper()
+                        else: token = token[0].upper() + token[1:]
+                        cap_id = None
+                    if TOKENIZER.is_marktone(prev_tid): token = " " + token # thêm space giữa 2 âm tiết liền nhau
+                if token_id == 32 and prev_tid == 32: continue # gộp nhiều spaces làm 1
                 print(token, end="", flush=True)
+        prev_tid = token_id
         out, state = model.forward(token_id, state)
 print()
