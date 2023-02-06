@@ -6,12 +6,12 @@ TODOs
 - [x] Đọc hiểu và rút gọn [code training](./rwkv-v4neo)
 - [ ] rwkv-lm với dataset âm tiết tiếng Việt
   - [x] Thiết kế symato vocab
-  - [x] Tạo mini dataset vlc.xyz
+  - [x] Tạo mini dataset vlc.xyz (16MB)
   - [x] Huấn luyện symato-2816-vlc-23m
   - [x] Chạy symato-2816-vlc-23m `./run.sh`
   - [x] Cải tiến Symato tknz giảm token space giữa 2 âm tiết
   - [x] __Tăng context length ~2x loss giảm ~1/2__
-- [ ] Tìm / build một dataset thuần Việt đủ lớn (300MB - 1GB)
+- [ ] Tìm / build một dataset thuần Việt đủ lớn (khoảng 300MB tới 1GB)
 - [ ] nanogpt với dataset âm tiết tiếng Việt
   - [ ] Huấn luyện symato-2816-vlc-nanogpt
   - [ ] Thêm các tricks như token-shift, receptance từ rwkv vào nanoGPT và đo lường độ hiệu quả
@@ -22,12 +22,14 @@ TODOs
 
 https://user-images.githubusercontent.com/8133/216773986-3d26d73a-9206-45b1-ae8f-d5d8fdb01199.mp4
 
-__Symato có thể làm hai việc một lúc, tự động thêm dấu thanh và sinh văn bản__
+## Symato có thể làm hai việc một lúc, tự động thêm dấu thanh và sinh văn bản
 ![](./docs/files/symato.jpg)
 
 - - -
 
-__Thiết lập các thử nghiệm theo mô hình ngôn ngữ [RWKV](./docs/rwkv.md) với bộ dữ liệu càng thuần Việt càng tốt, tập trung vào âm tiết tiếng Việt, để làm nhẹ bộ tham số và làm nổi bật đặc trưng của tiếng Việt__. Và trả lời các câu hỏi dưới đây:
+# Giới thiệu
+
+__Đây nơi thiết lập các thử nghiệm xây dựng [mô hình văn bản rất to](./docs/MHVBRT.md) với bộ dữ liệu càng thuần Việt càng tốt, tập trung vào âm tiết tiếng Việt, để làm nhẹ bộ tham số và làm nổi bật đặc trưng của tiếng Việt__. Và trả lời các câu hỏi dưới đây:
 
 - Liệu có thể lặp lại scaling law chỉ với một lượng dữ liệu và tính toán hạn chế? (xem cramming paper)
 
@@ -38,8 +40,6 @@ __Thiết lập các thử nghiệm theo mô hình ngôn ngữ [RWKV](./docs/rwk
 - Các cách khác nhau để tăng độ hiệu quả của một mô hình? (tiếp tục pre-train, fine-tune cho từng tác vụ, RLHL ...)
 
 - Bao nhiêu lượng dữ liệu là đủ để pre-train tiếp một mô hình đang có cho một ngôn ngữ lạ?
-
-- Liệu những gì nó học được từ lĩnh vực này có thể "mang sang" lĩnh vực khác không?
 
 - Với một lượng dữ liệu nhất định, của một lĩnh vực cụ thể thì nên tokenization như thế nào? Bao nhiêu params / training bao lâu là đủ?
 
