@@ -12,11 +12,14 @@ TODOs
   - [x] Cải tiến Symato tknz giảm token space giữa 2 âm tiết
   - [x] __Tăng context length ~2x loss giảm ~1/2 trong 10 epochs đầu__
 
-- [ ] Tìm / build một dataset thuần Việt đủ lớn (khoảng 300MB tới 1GB)
-  - [ ] Tìm kiếm https://huggingface.co/datasets?language=language:vi
-  - [x] news-corpus OK ~4Gb https://huggingface.co/datasets/bigscience-data/roots_vi_binhvq_news_corpus
-
-- [ ] Build mô hình 2 chiều xuôi ngược chỉ để bổ xung marktone
+- [ ] Tìm / build một dataset thuần Việt đủ lớn (khoảng vài trăm MB)
+  - [ ] Tìm kiếm tại:
+    - https://huggingface.co/datasets?language=language:vi
+    - https://www.kaggle.com/datasets?tags=17046-Vietnamese
+    - https://www.kaggle.com/datasets/minhnguynphc/vietnamese-person-name
+  - [x] news-corpus
+    - https://huggingface.co/datasets/bigscience-data/roots_vi_binhvq_news_corpus
+    - https://www.kaggle.com/datasets/phamtheds/news-dataset-vietnameses
 
 - [ ] nanogpt với dataset âm tiết tiếng Việt
   - [ ] Huấn luyện symato-2816-vlc-nanogpt

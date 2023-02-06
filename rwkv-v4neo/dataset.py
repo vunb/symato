@@ -16,7 +16,8 @@ class MyDataset(Dataset):
             import sys; sys.path.append('../')
             from symato import Symato
             smt = Symato()
-            self.data  = smt.tokenize(args.data_file)
+            self.data = smt.tokenize(args.data_file)
+            self.data.reverse()
             self.vocab_size = smt.vocab_size()
             self.data_size = len(self.data)
             rank_zero_info(f"Current vocab size = {self.vocab_size} (make sure it's correct)")
