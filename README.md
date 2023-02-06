@@ -10,7 +10,7 @@ TODOs
   - [x] Huấn luyện symato-2816-vlc-23m
   - [x] Chạy symato-2816-vlc-23m `./run.sh`
   - [x] Cải tiến Symato tknz giảm token space giữa 2 âm tiết
-  - [x] __Tăng context length ~2x loss giảm ~1/2__
+  - [x] __Tăng context length ~2x loss giảm ~1/2 trong 10 epochs đầu__
 - [ ] Tìm / build một dataset thuần Việt đủ lớn (khoảng 300MB tới 1GB)
 - [ ] nanogpt với dataset âm tiết tiếng Việt
   - [ ] Huấn luyện symato-2816-vlc-nanogpt

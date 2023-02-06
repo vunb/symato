@@ -174,7 +174,6 @@ from transformers import PreTrainedTokenizerFast
 # TOKENIZER = PreTrainedTokenizerFast(tokenizer_file="model/20B_tokenizer.json")
 # args = types.SimpleNamespace()
 # args.vocab_size = 50277
-# args.ctx_len = 1024
 # args.MODEL_NAME = "model/RWKV-4-Pile-169M-20220807-8023.pth"
 # args.n_layer = 12
 # args.n_embd = 768
@@ -189,7 +188,6 @@ args = types.SimpleNamespace()
 # args.MODEL_NAME = "model/symato-2816-vlc-23m.pth"
 args.MODEL_NAME = "rwkv-v4neo/out/rwkv-10.pth"
 args.vocab_size = 2816
-args.ctx_len = 640
 args.n_layer = 6
 args.n_embd = 512
 
