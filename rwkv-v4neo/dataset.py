@@ -41,7 +41,7 @@ class MyDataset(Dataset):
         args = self.args
         rank = self.global_rank
         epoch = self.real_epoch
-        world_size = self.world_size
+        world_size = self.world_size # total number of training processes
 
         ctx_len = args.ctx_len # ctx_len là độ dài chuỗi token đầu vào
         req_len = ctx_len + 1  # cộng thêm một token là kết quả đầu ra 
