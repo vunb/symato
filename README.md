@@ -22,7 +22,7 @@ TODOs
 
 https://user-images.githubusercontent.com/8133/216773986-3d26d73a-9206-45b1-ae8f-d5d8fdb01199.mp4
 
-__Symato có thể làm hai việc một lúc, tự động thêm dấu thanh và sinh văn bản__
+## Symato có thể làm hai việc một lúc, tự động thêm dấu thanh và sinh văn bản
 ![](./docs/files/symato.jpg)
 
 - - -
