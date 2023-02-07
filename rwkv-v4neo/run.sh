@@ -1,4 +1,4 @@
-python3 train.py --load_model "" --wandb "" --proj_dir "out" \
+python3 train.py --load_model "out/rwkv-0.pth" --wandb "" --proj_dir "out" \
 --data_file "../../file.txt" --data_type "chars" --vocab_size 0 \
 --ctx_len 512 --epoch_steps 2000 --epoch_count 500 --epoch_begin 0 --epoch_save 3 \
 --micro_bsz 12 --n_layer 6 --n_embd 512 --pre_ffn 0 --head_qk 0 \
