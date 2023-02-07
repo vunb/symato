@@ -198,8 +198,10 @@ print(f'\nUsing CPU. Loading {args.MODEL_NAME} ...')
 model = RWKV_RNN(args)
 
 def finetune_context(context):
+    # tids = []
+    # for syllable in context.split(): tids += list(TOKENIZER.syllable_to_tids(syllable))
     context = context.replace("\\", "|")
-    context = " ".join([f"{token}" for token in context.split()]) + " "
+    context = "".join([f"{token}" for token in context.split()]) + " "
     out, init_state, finetune_tids = None, None, []
     # Nhồi context (a.k.a prompt) vào mô hình
     tids = TOKENIZER.encode(context)
