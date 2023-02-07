@@ -214,11 +214,12 @@ def finetune_context(context):
     return out, init_state, finetune_context
 
 for TRIAL in range(NUM_TRIALS):
-    print(f'\n\n- - [ Lần thử {TRIAL} ]- - - - - - - - - - - - - - - - -')
+    print(f'\n\n- - [ Lần thử {TRIAL}: nhập tiếng Việt không dấu. Ví dụ "luat doanh nghiep" ] - - - - - - - - - -')
     context = input("Hỏi: ")
     out, state, new_ctx = finetune_context(context)
     print(f'Đáp: {new_ctx}', end="")
     cap_id, prev_tid = None, 0
+
     for i in range(LENGTH_PER_TRIAL): # sinh thêm LENGTH_PER_TRIAL tokens nữa từ prompt đầu vào
         token_id = sample_logits(out, TEMPERATURE, top_p) # lấy mẫu ngẫu nhiên token tiếp theo
         if TOKENIZER.is_capitalized(token_id):
@@ -235,6 +236,7 @@ for TRIAL in range(NUM_TRIALS):
                     else: token = token[0].upper() + token[1:]
                     cap_id = None
                 if TOKENIZER.is_marktone(prev_tid): token = " " + token # thêm space giữa 2 âm tiết liền nhau
+
             if token_id == 32 and prev_tid == 32: continue # gộp nhiều spaces làm 1
             print(token, end="", flush=True)
         prev_tid = token_id
