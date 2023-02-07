@@ -198,14 +198,16 @@ print(f'\nUsing CPU. Loading {args.MODEL_NAME} ...')
 model = RWKV_RNN(args)
 
 def finetune_context(context):
+    context = context.replace("\\", "|")
     context = " ".join([f"{token}" for token in context.split()]) + " "
     out, init_state, finetune_tids = None, None, []
     # Nhồi context (a.k.a prompt) vào mô hình
-    for token_id in TOKENIZER.encode(context):
+    tids = TOKENIZER.encode(context)
+    for i, token_id in enumerate(tids):
         finetune_tids.append(token_id)
         out, init_state = model.forward(token_id, init_state)
         # Tự động bỏ dấu thanh nếu chưa có
-        if TOKENIZER.is_sym(token_id):
+        if TOKENIZER.is_sym(token_id) and not TOKENIZER.is_marktone(tids[i + 1]):
             # TODO: tìm n-best marktone sequence
             best_marktone_id = 256 + out.numpy()[256:274].argmax()
             finetune_tids.append(best_marktone_id)
