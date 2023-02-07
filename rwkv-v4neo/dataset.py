@@ -23,6 +23,23 @@ class MyDataset(Dataset):
             rank_zero_info(f"Current vocab size = {self.vocab_size} (make sure it's correct)")
             rank_zero_info(f"Data has {self.data_size} samples.")
 
+        elif args.data_type == "chars":
+            self.data = open(args.data_file, "r", encoding="utf-8").read()
+            rank_zero_info("Building token list...")
+            unique = sorted(list(set(self.data)))
+            self.vocab_size = len(unique)
+            xx = 0
+            xxObj = {}
+            for u in unique:
+                xxObj[xx] = u
+                xx += 1
+            with open(f"{args.proj_dir}/vocab.json", "w", encoding="utf-8") as vocab_file:
+                vocab_file.write(json.dumps(xxObj, ensure_ascii=False))
+            self.data_size = len(self.data)
+            rank_zero_info(f"Data has {self.data_size} tokens, {self.vocab_size} vocab size.")
+            self.stoi = {ch: i for i, ch in enumerate(unique)}
+            self.itos = {i: ch for i, ch in enumerate(unique)}
+
         else: # unicode
             txt = open(args.data_file, "r", encoding=args.data_type).read()
             from tokenization_phobert_fast import PhobertTokenizerFast
@@ -37,20 +54,13 @@ class MyDataset(Dataset):
     def __len__(self):
         return self.args.epoch_steps * self.args.micro_bsz
 
-
     def __getitem__(self, idx):
         args = self.args
-        rank = self.global_rank
-        epoch = self.real_epoch
-        world_size = self.world_size # total number of training processes
-
         ctx_len = args.ctx_len # ctx_len là độ dài chuỗi token đầu vào
         req_len = ctx_len + 1  # cộng thêm một token là kết quả đầu ra 
-        magic_prime = args.magic_prime
-        data = self.data
         i = np.random.randint(0, self.data_size - req_len)
-        dix = data[i : i + req_len]
+        if args.data_type == "chars": dix = [self.stoi[s] for s in self.data[i : i + req_len]]
+        else: dix = self.data[i : i + req_len]
         x = torch.tensor(dix[:-1], dtype=torch.long)
         y = torch.tensor(dix[1:], dtype=torch.long)
-            
         return x, y
