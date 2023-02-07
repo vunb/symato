@@ -30,7 +30,6 @@ TODOs
 - [ ] Viết miniRWKV, train = công thức gpt, giải mã bằng công thức rnn, so sánh khác biệt!
 
 - [ ] Toán
-  - [ ] Chưa có công thức hồi quy cho [tiny-attn](./docs/tiny-attn.md)?
   - [ ] Tại sao [công thức hồi quy rwkv-4](./docs/wkv-cuda.md#tai-sao-lai-dung-cong-thuc-moi) lại đổi sang formula (new)?
 
 https://user-images.githubusercontent.com/8133/216773986-3d26d73a-9206-45b1-ae8f-d5d8fdb01199.mp4
