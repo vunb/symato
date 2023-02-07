@@ -35,10 +35,12 @@ TODOs
 
 https://user-images.githubusercontent.com/8133/216773986-3d26d73a-9206-45b1-ae8f-d5d8fdb01199.mp4
 
-## Symato có thể làm hai việc một lúc, tự động thêm dấu thanh và sinh văn bản
+### Symato có thể làm hai việc một lúc, tự động thêm dấu thanh và sinh văn bản
 ![](./docs/files/symato.jpg)
 
 - - -
+
+> Symato là viết tắt của Symbol + Mark + Tone. Google translate tiếng Hy Lạp sang tiếng Việt là "Đồng Cảm"
 
 # Giới thiệu
 
