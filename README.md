@@ -38,7 +38,7 @@ https://user-images.githubusercontent.com/8133/216773986-3d26d73a-9206-45b1-ae8f
 
 - - -
 
-> Symato là viết tắt của Symbol + Mark + Tone. Symato là một từ trong tiếng Hy Lạp có nghĩa là "Đồng Cảm"
+> Symato là viết tắt của Symbol + Mark + Tone. Google translate tiếng Hy Lạp sang tiếng Việt là "Đồng Cảm"
 
 # Giới thiệu
 
