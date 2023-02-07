@@ -214,7 +214,7 @@ def finetune_context(context):
     return out, init_state, finetune_context
 
 for TRIAL in range(NUM_TRIALS):
-    print(f'\n\n- - [ Lần thử {TRIAL}: nhập tiếng Việt không dấu. Ví dụ "luat doanh nghiep" ] - - - - - - - - - -')
+    print(f'\n\n\n- - - [ LẦN THỬ {TRIAL}: nhập tiếng Việt không dấu. Ví dụ "luat doanh nghiep" ] - - - - - - -\n')
     context = input("Hỏi: ")
     out, state, new_ctx = finetune_context(context)
     print(f'Đáp: {new_ctx}', end="")
