@@ -49,6 +49,6 @@ class MishGLU(MyModule):
         xx = self.time_shift(x)
         xa = x * self.time_mix_k + xx * (1 - self.time_mix_k) # time_mix_k, time_mix_r
         xb = x * self.time_mix_r + xx * (1 - self.time_mix_r) # là param vectors
-        a, b = self.aa(xa), self.bb(xb) # a, b, value là linear layers
+        a, b = self.aa(xa), self.bb(xb) # aa, bb, value là linear layers
         return self.value(a * F.mish(b))
 ```
