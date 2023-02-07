@@ -45,23 +45,10 @@ def forward(self, x):
 ## Thay channel-mixing bằng MishGLU
 ```py
 class MishGLU(MyModule):
-    def __init__(self, args, layer_id):
-        super().__init__()
-        self.args = args
-        self.layer_id = layer_id
-        self.my_testing = self.args.my_testing
-        self.time_shift = nn.ZeroPad2d((0, 0, 1, -1))
-
-        with torch.no_grad():
-            ratio_1_to_almost0 = 1.0 - (layer_id / args.n_layer)
-
-            x = torch.ones(1, 1, args.n_embd)
-            for i in range(args.n_embd):
-                x[0, 0, i] = i / args.n_embd
-
-            self.time_mix_k = nn.Parameter(torch.pow(x, ratio_1_to_almost0))
-            self.time_mix_r = nn.Parameter(torch.pow(x, ratio_1_to_almost0))
-            self.aa = nn.Linear(args.n_embd, args.dim_ffn, bias=False)
-            self.bb = nn.Linear(args.n_embd, args.dim_ffn, bias=False)
-            self.value = nn.Linear(args.dim_ffn, args.n_embd, bias=False)
+    def forward(self, x):
+        xx = self.time_shift(x)
+        xa = x * self.time_mix_k + xx * (1 - self.time_mix_k) # time_mix_k, time_mix_r
+        xb = x * self.time_mix_r + xx * (1 - self.time_mix_r) # là param vectors
+        a, b = self.aa(xa), self.bb(xb) # a, b, value là linear layers
+        return self.value(a * F.mish(b))
 ```
