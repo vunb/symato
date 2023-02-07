@@ -16,10 +16,12 @@ TODOs
   - [ ] Tìm kiếm tại:
     - https://huggingface.co/datasets?language=language:vi
     - https://www.kaggle.com/datasets?tags=17046-Vietnamese
-    - https://www.kaggle.com/datasets/minhnguynphc/vietnamese-person-name
   - [x] news-corpus
     - https://huggingface.co/datasets/bigscience-data/roots_vi_binhvq_news_corpus
     - https://www.kaggle.com/datasets/phamtheds/news-dataset-vietnameses
+
+- [ ] Các kỹ thuật tăng cường dữ liệu (augmentations)
+  - Random crop / cutout / progressive resizing
 
 - [ ] nanogpt với dataset âm tiết tiếng Việt
   - [ ] Huấn luyện symato-2816-vlc-nanogpt
