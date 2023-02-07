@@ -1,9 +1,3 @@
-''' Đây là bản rút gọn của 3 file `run.py`, `model_run.py`, và `utils.py` của từ https://github.com/BlinkDL/RWKV-LM/tree/main/RWKV-v4neo
-Bỏ đi phần code thừa, viết lại cho súc tích và dễ hiểu hơn. Mục đích để người mới bắt đầu hiểu được thuật toán forward
-của RWKV, cách mô hình sinh ra dữ liệu mới từ prompt đầu vào, qua đó nắm rõ kiến trúc của mô hình, và cách một mô hình
-ngôn ngữ hoạt động. Cách dùng: `./run.sh`
-'''
-
 import numpy as np
 import random, types, torch
 from torch.nn import functional as F
@@ -17,7 +11,7 @@ class RWKV_RNN(torch.jit.ScriptModule):
         super().__init__()
         self.args = args
         self.eval() # set torch to inference mode
-        
+
         # Load tham số từ file vào vào bộ nhớ và biến đổi cho phù hợp
         w = torch.load(args.MODEL_NAME, map_location='cpu')
         for k in w.keys():
@@ -169,59 +163,30 @@ class RWKV_RNN(torch.jit.ScriptModule):
 # Step 1: set model & config (use v4 to run your trained-from-scratch models. v4 and v4neo are compatible)
 ##########################################################################################################
 from symato import Symato
-from transformers import PreTrainedTokenizerFast
-
-# TOKENIZER = PreTrainedTokenizerFast(tokenizer_file="model/20B_tokenizer.json")
-# args = types.SimpleNamespace()
-# args.vocab_size = 50277
-# args.MODEL_NAME = "model/RWKV-4-Pile-169M-20220807-8023.pth"
-# args.n_layer = 12
-# args.n_embd = 768
-#
-## Có thể chạy với mô hình nặng hơn, 1.5 tỉ tham số
-# args.MODEL_NAME = "model/RWKV-4-Pile-1B5-20220929-ctx4096.pth"
-# args.n_layer = 24
-# args.n_embd = 2048
 
 TOKENIZER = Symato()
 args = types.SimpleNamespace()
 args.MODEL_NAME = "model/symato-2816-vlc-23m.pth"
-# args.MODEL_NAME = "rwkv-v4neo/out/rwkv-10.pth"
-args.vocab_size = 2816
 args.n_layer = 6
 args.n_embd = 512
 
 ########################################################################################################
 # Step 2: set prompt & sampling stuffs
 ########################################################################################################
-
-is_symato = isinstance(TOKENIZER, Symato)
-
-if is_symato:
-    context = random.choice([
-        "nghia vu nop thue", 
-        "quyen loi cong dan", 
-        "bo luat dan su viet nam gom nhung gi",
-        "ai duoc quyen mua nha o viet nam"
-    ])
-    context = " ".join([f"{token}" for token in context.split()]) + " "
-else:
-    context = "\nIn a shocking finding, scientist discovered a herd of dragons living in a remote "
-
-NUM_TRIALS = 3
-LENGTH_PER_TRIAL = 120 if not is_symato else 250
-TEMPERATURE = 1.0
+NUM_TRIALS = 10
+LENGTH_PER_TRIAL = 250
+TEMPERATURE = 0.9
 top_p = 0.8
 
 def sample_logits(out, temperature=1.0, top_p_usual=0.8):
     probs = F.softmax(out, dim=-1).numpy()
-    if is_symato: probs[256:274] = 0 # ko ngẫu nhiên sinh marktone
+    probs[256:274] = 0 # ko ngẫu nhiên sinh marktone
     sorted_probs = np.sort(probs)
     cumulative_probs = np.cumsum(sorted_probs) # [1,2,3] => [1,3,6]
     idx = np.argmax(cumulative_probs > top_p_usual) # vì là mảng True, False nên trả về idx của True đầu tiên
     cutoff = float(sorted_probs[idx]) # cutoff là tổng những prob lớn nhất đầu tiên vượt qua top_p_usual
     probs[probs < cutoff] = 0 # bỏ đi những prob < cutoff
-    if temperature != 1.0: probs = probs.pow(1.0 / temperature)
+    if temperature != 1.0: probs = np.power(probs, 1.0 / temperature)
     probs = probs / np.sum(probs) # chuẩn hóa lại probs sao cho tổng = 1
     return np.random.choice(a=len(probs), p=probs) # lấy mẫu
 
@@ -232,47 +197,46 @@ def sample_logits(out, temperature=1.0, top_p_usual=0.8):
 print(f'\nUsing CPU. Loading {args.MODEL_NAME} ...')
 model = RWKV_RNN(args)
 
-out, init_state, finetune_tids = None, None, []
-
-# Nhồi context (a.k.a prompt) vào mô hình
-for token_id in TOKENIZER.encode(context):
-    finetune_tids.append(token_id)
-    out, init_state = model.forward(token_id, init_state)
-    # Tự động bỏ dấu thanh nếu chưa có
-    if is_symato and TOKENIZER.is_sym(token_id):
-        # TODO: tìm n-best marktone sequence
-        best_marktone_id = 256 + out.numpy()[256:274].argmax()
-        finetune_tids.append(best_marktone_id)
-        out, init_state = model.forward(best_marktone_id, init_state)
-
-finetune_context = TOKENIZER.tids_to_utf8(finetune_tids) if is_symato else context
+def finetune_context(context):
+    context = " ".join([f"{token}" for token in context.split()]) + " "
+    out, init_state, finetune_tids = None, None, []
+    # Nhồi context (a.k.a prompt) vào mô hình
+    for token_id in TOKENIZER.encode(context):
+        finetune_tids.append(token_id)
+        out, init_state = model.forward(token_id, init_state)
+        # Tự động bỏ dấu thanh nếu chưa có
+        if TOKENIZER.is_sym(token_id):
+            # TODO: tìm n-best marktone sequence
+            best_marktone_id = 256 + out.numpy()[256:274].argmax()
+            finetune_tids.append(best_marktone_id)
+            out, init_state = model.forward(best_marktone_id, init_state)
+    finetune_context = TOKENIZER.tids_to_utf8(finetune_tids)
+    return out, init_state, finetune_context
 
 for TRIAL in range(NUM_TRIALS):
-    print(f'\n\n--[ Lần thử {TRIAL} ]-----------------')
-    print(f'Hỏi: {context}\nĐáp: {finetune_context}', end="")
-    state = init_state.clone() # clone() để giữ nguyên init_state cho lần TRIAL tiếp theo
+    print(f'\n\n- - [ Lần thử {TRIAL} ]- - - - - - - - - - - - - - - - -')
+    context = input("Hỏi: ")
+    out, state, new_ctx = finetune_context(context)
+    print(f'Đáp: {new_ctx}', end="")
     cap_id, prev_tid = None, 0
     for i in range(LENGTH_PER_TRIAL): # sinh thêm LENGTH_PER_TRIAL tokens nữa từ prompt đầu vào
         token_id = sample_logits(out, TEMPERATURE, top_p) # lấy mẫu ngẫu nhiên token tiếp theo
-        if not is_symato:
-            print(TOKENIZER.decode(token_id), end="", flush=True)
+        if TOKENIZER.is_capitalized(token_id):
+            cap_id = token_id
         else:
-            if TOKENIZER.is_capitalized(token_id):
-                cap_id = token_id
-            else:
-                token = TOKENIZER.decode(token_id)
-                if TOKENIZER.is_sym(token_id):
-                    out, state = model.forward(token_id, state)
-                    best_marktone_id = 256 + out.numpy()[256:274].argmax()
-                    token = TOKENIZER.to_utf8(token_id, best_marktone_id)
-                    token_id = best_marktone_id
-                    if cap_id is not None:
-                        if TOKENIZER.is_sym_capitalized(cap_id): token = token.upper()
-                        else: token = token[0].upper() + token[1:]
-                        cap_id = None
-                    if TOKENIZER.is_marktone(prev_tid): token = " " + token # thêm space giữa 2 âm tiết liền nhau
-                if token_id == 32 and prev_tid == 32: continue # gộp nhiều spaces làm 1
-                print(token, end="", flush=True)
+            token = TOKENIZER.decode(token_id)
+            if TOKENIZER.is_sym(token_id):
+                out, state = model.forward(token_id, state)
+                best_marktone_id = 256 + out.numpy()[256:274].argmax()
+                token = TOKENIZER.to_utf8(token_id, best_marktone_id)
+                token_id = best_marktone_id
+                if cap_id is not None:
+                    if TOKENIZER.is_sym_capitalized(cap_id): token = token.upper()
+                    else: token = token[0].upper() + token[1:]
+                    cap_id = None
+                if TOKENIZER.is_marktone(prev_tid): token = " " + token # thêm space giữa 2 âm tiết liền nhau
+            if token_id == 32 and prev_tid == 32: continue # gộp nhiều spaces làm 1
+            print(token, end="", flush=True)
         prev_tid = token_id
         out, state = model.forward(token_id, state)
 print()
