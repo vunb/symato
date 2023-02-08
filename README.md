@@ -25,10 +25,7 @@ TODOs
 - [ ] nanogpt với dataset âm tiết tiếng Việt
   - [ ] Huấn luyện symato-2816-vlc-nanogpt
   - [ ] Thêm các tricks như token-shift, receptance từ rwkv vào nanoGPT và đo lường độ hiệu quả
-
 - [ ] Viết miniRWKV, train = công thức gpt, giải mã bằng công thức rnn, so sánh khác biệt!
-
-- [ ] Toán: tại sao [công thức hồi quy rwkv-4](./docs/wkv-cuda.md#tai-sao-lai-dung-cong-thuc-moi) lại đổi sang formula (new)?
 
 https://user-images.githubusercontent.com/8133/216773986-3d26d73a-9206-45b1-ae8f-d5d8fdb01199.mp4
 
