@@ -22,7 +22,7 @@ TODOs
   - [ ] Các kỹ thuật tăng cường dữ liệu (augmentations)
     - Random crop / cutout / progressive resizing
 
-- [ ] Huấn luyện một mô hình < 1 tỉ tham số với dataset trên (cần phần cứng mạnh)
+
 
 - [ ] Low-level
   - [ ] Tích hợp bộ phân tích ngữ âm từ zig vào python
