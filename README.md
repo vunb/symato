@@ -23,8 +23,8 @@ TODOs
     - Random crop / cutout / progressive resizing
 
 - [ ] Low-level
-  - Tích hợp bộ phân tích ngữ âm từ zig vào python
-  - Viết lại inference engine bằng zig
+  - [ ] Tích hợp bộ phân tích ngữ âm từ zig vào python
+  - [ ] Viết lại inference engine bằng zig
 
 https://user-images.githubusercontent.com/8133/216773986-3d26d73a-9206-45b1-ae8f-d5d8fdb01199.mp4
 
