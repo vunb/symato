@@ -19,9 +19,8 @@ TODOs
   - [x] news-corpus
     - https://huggingface.co/datasets/bigscience-data/roots_vi_binhvq_news_corpus
     - https://www.kaggle.com/datasets/phamtheds/news-dataset-vietnameses
-
-- [ ] Các kỹ thuật tăng cường dữ liệu (augmentations)
-  - Random crop / cutout / progressive resizing
+  - [ ] Các kỹ thuật tăng cường dữ liệu (augmentations)
+    - Random crop / cutout / progressive resizing
 
 - [ ] nanogpt với dataset âm tiết tiếng Việt
   - [ ] Huấn luyện symato-2816-vlc-nanogpt
