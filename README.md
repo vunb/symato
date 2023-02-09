@@ -31,11 +31,12 @@
     - https://huggingface.co/datasets/bigscience-data/roots_vi_vietnamese_poetry (57MB)
     - https://huggingface.co/datasets/truongpdd/vietnamese_poetry (64MB)
     - https://huggingface.co/datasets/truongpdd/luc-bat (33MB)
-  - [ ] Văn bản chính quy (cần crawl từ Internet)
-    - ...
-  - [ ] Wikipedia (có thể download trực tiếp)
+  - [x] Wikipedia (`1GB nén` download trực tiếp)
+    - https://dumps.wikimedia.org/viwiki
     - https://huggingface.co/datasets/truongpdd/viwiki-dummy (240MB)
     - https://huggingface.co/datasets/bigscience-data/roots_vi_wikipedia (257MB)
+  - [ ] Văn bản chính quy (cần crawl từ Internet)
+    - ...
   - [ ] khác?
     - ...
 
