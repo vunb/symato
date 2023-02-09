@@ -19,6 +19,7 @@
   - Nguồn
     - Lọc từ https://github.com/CarperAI/pilev2
     - https://huggingface.co/datasets?language=language:vi
+    - https://huggingface.co/datasets?search=viet
     - https://www.kaggle.com/datasets?tags=17046-Vietnamese
     - [x] news-corpus (quá dư, cần hạn chế số lượng)
       - https://huggingface.co/datasets/bigscience-data/roots_vi_binhvq_news_corpus
