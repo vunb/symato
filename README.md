@@ -15,37 +15,42 @@
 
 ## Thử nghiệm với dữ liệu đủ lớn
 
-- [ ] 1/ Sưu tầm dataset Việt đủ lớn, đủ đa dạng (ngoài news, các dạng khác rất ít data)
-  - Nguồn
+- [ ] 1/ Sưu tầm "dữ liệu văn bản" Việt đủ lớn, đủ đa dạng (ngoài tin tức, các dạng khác rất ít data)
+  - [x] Nguồn
     - Lọc từ https://github.com/CarperAI/pilev2
     - https://huggingface.co/datasets?language=language:vi
     - https://huggingface.co/datasets?search=viet
     - https://www.kaggle.com/datasets?tags=17046-Vietnamese
-    - [x] news-corpus (quá dư, cần hạn chế số lượng)
-      - https://huggingface.co/datasets/bigscience-data/roots_vi_binhvq_news_corpus
-      - https://www.kaggle.com/datasets/phamtheds/news-dataset-vietnameses
-    - [ ] Sách, truyện
-      - https://huggingface.co/datasets/truongpdd/vietnamese_story (480MB)
-      - 
-    - [ ] Thơ
-      - https://huggingface.co/datasets/bigscience-data/roots_vi_vietnamese_poetry (57MB)
-    - [ ] Văn bản chính quy
-    - [ ] wikipedia
-    - [ ] khác?
-  - [ ] 2/ Các kỹ thuật tăng cường dữ liệu và làm tốt dữ liệu
-    - Random crop / cutout / progressive resizing
-    - loại bỏ dữ liệu kém (lọc theo tỉ lệ âm tiết, chất lượng âm tiết)
-    - dedup (minhash, simhash)
-    - data selection https://github.com/p-lambda/dsir
-  - [ ] 3/ Phân tích dữ liệu, làm cân bằng dữ liệu
-    - [ ] `symato2816+` BPE sau khi tknz thành 2816 ids, để đạt tới vocab_size định trước
-  - [ ] 4/ Build & train mô hình có độ lớn phù hợp với dữ liệu sau khi đã lọc và cân bằng
+  - [x] Tin tức (quá dư, cần hạn chế số lượng)
+    - https://huggingface.co/datasets/bigscience-data/roots_vi_binhvq_news_corpus (20GB)
+    - https://huggingface.co/datasets/truongpdd/vietnews-datase (34GB)
+  - [ ] Sách, truyện, thơ
+    - https://huggingface.co/datasets/truongpdd/vietnamese_story (480MB)
+    - https://huggingface.co/datasets/truongpdd/vietnamese_poetry_story (538MB)
+    - https://huggingface.co/datasets/bigscience-data/roots_vi_vietnamese_poetry (57MB)
+    - https://huggingface.co/datasets/truongpdd/vietnamese_poetry (64MB)
+    - https://huggingface.co/datasets/truongpdd/luc-bat (33MB)
+  - [ ] Văn bản chính quy
+    - ...
+  - [ ] Wikipedia
+    - https://huggingface.co/datasets/truongpdd/viwiki-dummy (240MB)
+  - [ ] khác
+    - ...
 
-## Khác
+- [ ] 2/ Các kỹ thuật tăng cường dữ liệu và làm tốt dữ liệu
+  - Random crop / cutout / progressive resizing
+  - loại bỏ dữ liệu kém (lọc theo tỉ lệ âm tiết, chất lượng âm tiết)
+  - dedup (minhash, simhash)
+  - data selection https://github.com/p-lambda/dsir
 
-- [ ] Low-level
-  - [ ] Tích hợp bộ phân tích ngữ âm từ zig vào python để có thể tknz trực tiếp từ Python code
-  - [ ] Viết lại inference engine bằng zig để tăng tốc tối đa
+- [ ] 3/ Phân tích dữ liệu, làm cân bằng dữ liệu
+  - [ ] `symato2816+` BPE sau khi tknz thành 2816 ids, để đạt tới vocab_size định trước
+
+- [ ] 4/ Build & train mô hình có độ lớn phù hợp với dữ liệu sau khi đã lọc và cân bằng
+
+## Low-level
+- [ ] Tích hợp bộ phân tích ngữ âm từ zig vào python để có thể tknz trực tiếp từ Python code
+- [ ] Viết lại inference engine bằng zig để tăng tốc tối đa
 
 https://user-images.githubusercontent.com/8133/216773986-3d26d73a-9206-45b1-ae8f-d5d8fdb01199.mp4
 
