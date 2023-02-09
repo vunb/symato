@@ -25,6 +25,10 @@
       - https://huggingface.co/datasets/bigscience-data/roots_vi_binhvq_news_corpus
       - https://www.kaggle.com/datasets/phamtheds/news-dataset-vietnameses
     - [ ] Sách, truyện
+      - https://huggingface.co/datasets/truongpdd/vietnamese_story (480MB)
+      - 
+    - [ ] Thơ
+      - https://huggingface.co/datasets/bigscience-data/roots_vi_vietnamese_poetry (57MB)
     - [ ] Văn bản chính quy
     - [ ] wikipedia
     - [ ] khác?
