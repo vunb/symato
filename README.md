@@ -21,20 +21,22 @@
     - https://huggingface.co/datasets?language=language:vi
     - https://huggingface.co/datasets?search=viet
     - https://www.kaggle.com/datasets?tags=17046-Vietnamese
-  - [x] Tin tức (quá dư, cần hạn chế số lượng)
+  - [x] Tin tức (`124GB` quá dư, cần hạn chế số lượng)
     - https://huggingface.co/datasets/bigscience-data/roots_vi_binhvq_news_corpus (20GB)
     - https://huggingface.co/datasets/truongpdd/vietnews-datase (34GB)
-  - [ ] Sách, truyện, thơ
+    - https://www.kaggle.com/datasets/nekonekonyan/vietnamesenewspapers (70GB)
+  - [x] Sách, truyện, thơ (`1.1GB`)
     - https://huggingface.co/datasets/truongpdd/vietnamese_story (480MB)
     - https://huggingface.co/datasets/truongpdd/vietnamese_poetry_story (538MB)
     - https://huggingface.co/datasets/bigscience-data/roots_vi_vietnamese_poetry (57MB)
     - https://huggingface.co/datasets/truongpdd/vietnamese_poetry (64MB)
     - https://huggingface.co/datasets/truongpdd/luc-bat (33MB)
-  - [ ] Văn bản chính quy
+  - [ ] Văn bản chính quy (cần crawl từ Internet)
     - ...
-  - [ ] Wikipedia
+  - [ ] Wikipedia (có thể download trực tiếp)
     - https://huggingface.co/datasets/truongpdd/viwiki-dummy (240MB)
-  - [ ] khác
+    - https://huggingface.co/datasets/bigscience-data/roots_vi_wikipedia (257MB)
+  - [ ] khác?
     - ...
 
 - [ ] 2/ Các kỹ thuật tăng cường dữ liệu và làm tốt dữ liệu
