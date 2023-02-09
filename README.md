@@ -6,7 +6,7 @@ TODOs
 - [x] Đọc hiểu và rút gọn [code training](./rwkv-v4neo)
 - [x] rwkv-lm với dataset âm tiết tiếng Việt bất kỳ
   - [x] Thiết kế symato vocab
-  - [x] Tạo mini dataset vlc.xyz (16MB)
+  - [x] Tạo mini dataset [vlc.xyz](https://raw.githubusercontent.com/telexyz/data/master/vlc.xyz) (16MB)
   - [x] Huấn luyện symato-2816-vlc-23m
   - [x] Chạy symato-2816-vlc-23m `./run.sh`
   - [x] Cải tiến Symato tknz giảm token space giữa 2 âm tiết
