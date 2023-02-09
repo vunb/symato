@@ -16,7 +16,8 @@
 ## Thử nghiệm với dữ liệu đủ lớn
 
 - [ ] 1/ Sưu tầm dataset Việt đủ lớn, đủ đa dạng (ngoài news, các dạng khác rất ít data)
-  - Nguồn tìm kiếm
+  - Nguồn
+    - Lọc từ https://github.com/CarperAI/pilev2
     - https://huggingface.co/datasets?language=language:vi
     - https://www.kaggle.com/datasets?tags=17046-Vietnamese
     - [x] news-corpus (quá dư, cần hạn chế số lượng)
