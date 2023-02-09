@@ -12,19 +12,33 @@ TODOs
   - [x] Cải tiến Symato tknz giảm token space giữa 2 âm tiết
   - [x] __Tăng context length ~2x loss giảm ~1/2 trong 10 epochs đầu__
 
-- [ ] Tìm / build một dataset Việt đủ lớn, đủ đa dạng (ngoài news, các dạng khác rất ít data)
-  - [ ] Nguồn
+- - -
+
+- [ ] 1/ Sưu tầm dataset Việt đủ lớn, đủ đa dạng (ngoài news, các dạng khác rất ít data)
+  - Nguồn tìm kiếm
     - https://huggingface.co/datasets?language=language:vi
     - https://www.kaggle.com/datasets?tags=17046-Vietnamese
-  - [x] news-corpus
-    - https://huggingface.co/datasets/bigscience-data/roots_vi_binhvq_news_corpus
-    - https://www.kaggle.com/datasets/phamtheds/news-dataset-vietnameses
-  - [ ] Các kỹ thuật tăng cường dữ liệu (augmentations)
+    - [x] news-corpus (quá dư, cần hạn chế số lượng)
+      - https://huggingface.co/datasets/bigscience-data/roots_vi_binhvq_news_corpus
+      - https://www.kaggle.com/datasets/phamtheds/news-dataset-vietnameses
+    - [ ] Sách, truyện
+    - [ ] Văn bản chính quy
+    - [ ] wikipedia
+    - [ ] khác?
+  - [ ] 2/ Các kỹ thuật tăng cường dữ liệu và làm tốt dữ liệu
     - Random crop / cutout / progressive resizing
+    - loại bỏ dữ liệu kém (lọc theo tỉ lệ âm tiết, chất lượng âm tiết)
+    - dedup (minhash, simhash)
+    - data selection https://github.com/p-lambda/dsir
+  - [ ] 3/ Phân tích dữ liệu, làm cân bằng dữ liệu
+    - [ ] `symato2816+` BPE sau khi tknz thành 2816 ids, để đạt tới vocab_size định trước
+  - [ ] 4/ Build & train mô hình có độ lớn phù hợp với dữ liệu sau khi đã lọc và cân bằng
+
+- - -
 
 - [ ] Low-level
-  - [ ] Tích hợp bộ phân tích ngữ âm từ zig vào python
-  - [ ] Viết lại inference engine bằng zig
+  - [ ] Tích hợp bộ phân tích ngữ âm từ zig vào python để có thể tknz trực tiếp từ Python code
+  - [ ] Viết lại inference engine bằng zig để tăng tốc tối đa
 
 https://user-images.githubusercontent.com/8133/216773986-3d26d73a-9206-45b1-ae8f-d5d8fdb01199.mp4
 
