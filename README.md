@@ -12,8 +12,8 @@ TODOs
   - [x] Cải tiến Symato tknz giảm token space giữa 2 âm tiết
   - [x] __Tăng context length ~2x loss giảm ~1/2 trong 10 epochs đầu__
 
-- [ ] Tìm / build một dataset thuần Việt đủ lớn (khoảng vài trăm MB)
-  - [ ] Tìm kiếm tại:
+- [ ] Tìm / build một dataset Việt đủ lớn, đủ đa dạng (ngoài news, các dạng khác rất ít data)
+  - [ ] Nguồn
     - https://huggingface.co/datasets?language=language:vi
     - https://www.kaggle.com/datasets?tags=17046-Vietnamese
   - [x] news-corpus
@@ -21,8 +21,6 @@ TODOs
     - https://www.kaggle.com/datasets/phamtheds/news-dataset-vietnameses
   - [ ] Các kỹ thuật tăng cường dữ liệu (augmentations)
     - Random crop / cutout / progressive resizing
-
-
 
 - [ ] Low-level
   - [ ] Tích hợp bộ phân tích ngữ âm từ zig vào python
