@@ -1,3 +1,4 @@
+pip install -r ./requirements.txt
 # Symato tknz on qna
 python3 train.py --load_model "" --wandb "" --proj_dir "out" \
 --data_file "../../file.xyz" --data_type "symato" --vocab_size 0 \
