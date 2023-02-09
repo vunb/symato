@@ -1,5 +1,6 @@
-TODOs
+# TODOs
 
+## Thử nghiệm với dữ liệu nhỏ (DONE)
 - [x] Tìm cách tokenize hợp với tiếng việt (xem [symato](#symato))
 - [x] Đọc hiểu rwkv ([xem rwkv.md](./docs/rwkv.md) hoặc [bản rút gọn](./docs/rwkv-illustrated.md))
 - [x] Viết lại rwkv inference engine [~200 loc in python](https://github.com/telexyz/symato/blob/1854f26d097ea616f8f76c054d0357f739d7c92c/model_run_f32.py)
@@ -12,7 +13,7 @@ TODOs
   - [x] Cải tiến Symato tknz giảm token space giữa 2 âm tiết
   - [x] __Tăng context length ~2x loss giảm ~1/2 trong 10 epochs đầu__
 
-- - -
+## Thử nghiệm với dữ liệu đủ lớn
 
 - [ ] 1/ Sưu tầm dataset Việt đủ lớn, đủ đa dạng (ngoài news, các dạng khác rất ít data)
   - Nguồn tìm kiếm
@@ -34,7 +35,7 @@ TODOs
     - [ ] `symato2816+` BPE sau khi tknz thành 2816 ids, để đạt tới vocab_size định trước
   - [ ] 4/ Build & train mô hình có độ lớn phù hợp với dữ liệu sau khi đã lọc và cân bằng
 
-- - -
+## Khác
 
 - [ ] Low-level
   - [ ] Tích hợp bộ phân tích ngữ âm từ zig vào python để có thể tknz trực tiếp từ Python code
