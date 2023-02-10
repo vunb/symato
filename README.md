@@ -11,7 +11,7 @@
   - [x] Huấn luyện symato-2816-vlc-23m
   - [x] Chạy symato-2816-vlc-23m `./run.sh`
   - [x] Cải tiến Symato tknz giảm token space giữa 2 âm tiết
-  - [x] __Tăng context length ~2x loss giảm ~1/2 trong 10 epochs đầu__
+  - [x] __Tăng context length 2x => loss giảm 1/2 trong 10 epochs đầu__
 
 ## Thử nghiệm với dữ liệu đủ lớn
 
@@ -21,23 +21,27 @@
     - https://huggingface.co/datasets?language=language:vi
     - https://huggingface.co/datasets?search=viet
     - https://www.kaggle.com/datasets?tags=17046-Vietnamese
-  - [x] Tin tức (`124GB` quá dư, cần hạn chế số lượng)
+  - [x] Tin tức (124GB quá dư)
     - https://huggingface.co/datasets/bigscience-data/roots_vi_binhvq_news_corpus (20GB)
     - https://huggingface.co/datasets/truongpdd/vietnews-datase (34GB)
     - https://www.kaggle.com/datasets/nekonekonyan/vietnamesenewspapers (70GB)
-  - [x] Sách, truyện, thơ (`1.1GB`)
+  - [x] Truyện, thơ (1.1GB)
     - https://huggingface.co/datasets/truongpdd/vietnamese_story (480MB)
     - https://huggingface.co/datasets/truongpdd/vietnamese_poetry_story (538MB)
     - https://huggingface.co/datasets/bigscience-data/roots_vi_vietnamese_poetry (57MB)
     - https://huggingface.co/datasets/truongpdd/vietnamese_poetry (64MB)
     - https://huggingface.co/datasets/truongpdd/luc-bat (33MB)
-  - [x] Wikipedia (`1GB nén` download trực tiếp)
-    - https://dumps.wikimedia.org/viwiki
+  - [x] Wikipedia (1GB nén)
+    - https://dumps.wikimedia.org/viwiki (1GB nén, download trực tiếp)
     - https://huggingface.co/datasets/truongpdd/viwiki-dummy (240MB)
     - https://huggingface.co/datasets/bigscience-data/roots_vi_wikipedia (257MB)
+  - [ ] Sách
+    - ...
   - [ ] Văn bản chính quy (cần crawl từ Internet)
     - ...
-  - [ ] khác?
+  - [ ] Khác?
+    - Diễn đàn
+    - Facebook
     - ...
 
 - [ ] 2/ Các kỹ thuật tăng cường dữ liệu và làm tốt dữ liệu
