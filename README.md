@@ -38,11 +38,12 @@
     - https://huggingface.co/datasets/bigscience-data/roots_vi_wikipedia (257MB)
   - [ ] Sách
     - ...
-  - [ ] Văn bản chính quy (cần crawl từ Internet)
+  - [ ] Văn bản chính quy
     - ...
   - [ ] Khác?
     - Diễn đàn
-    - Facebook
+    - Mạng xã hội
+    - Public chat room
     - ...
 
 - [ ] 2/ Các kỹ thuật tăng cường dữ liệu và làm tốt dữ liệu
