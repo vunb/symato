@@ -21,7 +21,8 @@
     - https://huggingface.co/datasets?language=language:vi
     - https://huggingface.co/datasets?search=viet
     - https://www.kaggle.com/datasets?tags=17046-Vietnamese
-  - [x] Tin tức (quá dư)
+  - [ ] Tin tức (quá dư)
+    - [ ] Cần phân loại theo categories (tin tức, khoa học, kiến thức, xã hội, luật pháp ...) và cân đối lại
     - https://huggingface.co/datasets/bigscience-data/roots_vi_binhvq_news_corpus (20GB)
     - https://huggingface.co/datasets/truongpdd/vietnews-datase (34GB)
     - https://www.kaggle.com/datasets/nekonekonyan/vietnamesenewspapers (70GB gồm cả ảnh)
