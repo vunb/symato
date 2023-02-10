@@ -21,10 +21,10 @@
     - https://huggingface.co/datasets?language=language:vi
     - https://huggingface.co/datasets?search=viet
     - https://www.kaggle.com/datasets?tags=17046-Vietnamese
-  - [x] Tin tức (124GB quá dư)
+  - [x] Tin tức (quá dư)
     - https://huggingface.co/datasets/bigscience-data/roots_vi_binhvq_news_corpus (20GB)
     - https://huggingface.co/datasets/truongpdd/vietnews-datase (34GB)
-    - https://www.kaggle.com/datasets/nekonekonyan/vietnamesenewspapers (70GB)
+    - https://www.kaggle.com/datasets/nekonekonyan/vietnamesenewspapers (70GB gồm cả ảnh)
   - [x] Truyện, thơ (1.1GB)
     - https://huggingface.co/datasets/truongpdd/vietnamese_story (480MB)
     - https://huggingface.co/datasets/truongpdd/vietnamese_poetry_story (538MB)
