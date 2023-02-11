@@ -169,10 +169,10 @@ args.n_layer = 6
 args.n_embd = 512
 from symato_2816 import Symato
 
-args.MODEL_NAME = "rwkv-v4neo/out/rwkv-0.pth"
-args.n_layer = 4
-args.n_embd = 320
-from symato_2944 import Symato
+# args.MODEL_NAME = "rwkv-v4neo/out/rwkv-5.pth"
+# args.n_layer = 4
+# args.n_embd = 320
+# from symato_2944 import Symato
 
 TOKENIZER = Symato()
 
@@ -234,7 +234,7 @@ for TRIAL in range(NUM_TRIALS):
         token_id = sample_logits(out, TEMPERATURE, top_p) # lấy mẫu ngẫu nhiên token tiếp theo
         if TOKENIZER.is_capitalized(token_id):
             cap_id = token_id
-            if TOKENIZER.is_marktone(prev_tid): token = " " + token # thêm space giữa 2 âm tiết liền nhau
+            if TOKENIZER.is_marktone(prev_tid): print(" ", end="")
         else:
             token = TOKENIZER.decode(token_id)
             if TOKENIZER.is_sym(token_id):
@@ -250,6 +250,7 @@ for TRIAL in range(NUM_TRIALS):
 
             if token_id == 32 and prev_tid == 32: continue # gộp nhiều spaces làm 1
             print(token, end="", flush=True)
+
         prev_tid = token_id
         out, state = model.forward(token_id, state)
 print()
