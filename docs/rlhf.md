@@ -1,3 +1,9 @@
+https://youtu.be/wA8rjKueB3Q?t=4742
+
+c
+
+- - -
+
 # Illustrating Reinforcement Learning from Human Feedback
 https://huggingface.co/blog/rlhf
 

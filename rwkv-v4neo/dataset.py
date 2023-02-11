@@ -14,11 +14,11 @@ class MyDataset(Dataset):
 
         if args.data_type == "symato":
             import sys; sys.path.append('../')
-            from symato import Symato
-            smt = Symato()
-            self.data = smt.tokenize(args.data_file, rev=(args.data_order == "reversed"))
-            print("\n\n- - - [ TRAIN DATA SAMPLE ] - - -\n", smt.tids_to_utf8(self.data[-800:]), "\n\n")
-            self.vocab_size = smt.vocab_size()
+            from symato_2944 import Symato; symato = Symato()
+            self.data = symato.tokenize(args.data_file, rev=(args.data_order == "reversed"))
+            sample = symato.tids_to_utf8(self.data[-800:])
+            print("\n\n- - - [ TRAIN DATA SAMPLE ] - - -\n", sample, "\n\n")
+            self.vocab_size = symato.vocab_size()
             self.data_size = len(self.data)
             rank_zero_info(f"Current vocab size = {self.vocab_size} (make sure it's correct)")
             rank_zero_info(f"Data has {self.data_size} samples.")

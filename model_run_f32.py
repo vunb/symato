@@ -162,13 +162,19 @@ class RWKV_RNN(torch.jit.ScriptModule):
 ##########################################################################################################
 # Step 1: set model & config (use v4 to run your trained-from-scratch models. v4 and v4neo are compatible)
 ##########################################################################################################
-from symato import Symato
 
-TOKENIZER = Symato()
 args = types.SimpleNamespace()
 args.MODEL_NAME = "model/symato-2816-vlc-23m.pth"
 args.n_layer = 6
 args.n_embd = 512
+from symato_2816 import Symato
+
+args.MODEL_NAME = "rwkv-v4neo/out/rwkv-0.pth"
+args.n_layer = 4
+args.n_embd = 320
+from symato_2944 import Symato
+
+TOKENIZER = Symato()
 
 ########################################################################################################
 # Step 2: set prompt & sampling stuffs
@@ -228,6 +234,7 @@ for TRIAL in range(NUM_TRIALS):
         token_id = sample_logits(out, TEMPERATURE, top_p) # lấy mẫu ngẫu nhiên token tiếp theo
         if TOKENIZER.is_capitalized(token_id):
             cap_id = token_id
+            if TOKENIZER.is_marktone(prev_tid): token = " " + token # thêm space giữa 2 âm tiết liền nhau
         else:
             token = TOKENIZER.decode(token_id)
             if TOKENIZER.is_sym(token_id):
