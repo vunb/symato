@@ -46,16 +46,13 @@
     - Public chat room
     - ...
 
-- [ ] 2/ Các kỹ thuật tăng cường dữ liệu và làm tốt dữ liệu
-  - Random crop / cutout / progressive resizing
+- [ ] Làm tốt dữ liệu
   - loại bỏ dữ liệu kém (lọc theo tỉ lệ âm tiết, chất lượng âm tiết)
   - dedup (minhash, simhash)
   - data selection https://github.com/p-lambda/dsir
+  - Cân bằng giữa các loại dữ liệu
 
-- [ ] 3/ Phân tích dữ liệu, làm cân bằng dữ liệu
-  - [ ] `symato2816+` BPE sau khi tknz thành 2816 ids, để đạt tới vocab_size định trước
-
-- [ ] 4/ Build & train mô hình có độ lớn phù hợp với dữ liệu sau khi đã lọc và cân bằng
+- [ ] 3/ Build & train mô hình có độ lớn phù hợp với dữ liệu sau khi đã lọc và cân bằng
 
 ## Low-level
 - [ ] Tích hợp bộ phân tích ngữ âm từ zig vào python để có thể tknz trực tiếp từ Python code
