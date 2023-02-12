@@ -15,7 +15,7 @@
 
 ## Thử nghiệm với dữ liệu đủ lớn
 
-- [ ] 1/ Sưu tầm "dữ liệu văn bản" Việt đủ lớn, đủ đa dạng (ngoài tin tức, các dạng khác rất ít data)
+- [ ] 1/ Sưu tầm "dữ liệu" đủ lớn, đủ đa dạng (ngoài tin tức, các dạng khác rất ít)
   - [x] Nguồn
     - Lọc từ https://github.com/CarperAI/pilev2
     - https://huggingface.co/datasets?language=language:vi
