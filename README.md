@@ -17,7 +17,8 @@
 
 - [ ] 1/ Sưu tầm "dữ liệu" đủ lớn, đủ đa dạng (ngoài tin tức, các dạng khác rất ít)
   - [x] Nguồn
-    - Lọc từ https://github.com/CarperAI/pilev2
+    - Lọc từ https://github.com/CarperAI/pilev2 ?
+    - https://data.statmt.org/cc-100/vi.txt.xz (27G nén)
     - https://huggingface.co/datasets?language=language:vi
     - https://huggingface.co/datasets?search=viet
     - https://www.kaggle.com/datasets?tags=17046-Vietnamese
