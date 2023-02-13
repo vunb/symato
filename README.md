@@ -54,6 +54,9 @@
   - Cân bằng giữa các loại dữ liệu
 
 - [ ] 3/ Build & train mô hình có độ lớn phù hợp với dữ liệu sau khi đã lọc và cân bằng
+  - Xây dựng bộ tknz symato+ với vocab_size tùy ý
+  - Thử nghiệm với nhiều vocab_size (16k, 32k, 64k)
+  - Thử nghiệm với nhiều params size (từ vài chục triệu cho tới vài tỉ tham số)
 
 ## Low-level
 - [ ] Tích hợp bộ phân tích ngữ âm từ zig vào python để có thể tknz trực tiếp từ Python code
