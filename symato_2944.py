@@ -22,7 +22,7 @@ class Symato:
 	def is_capitalized(self, token_id): return token_id == 275 or token_id == 274 # viết hoa chữ đầu hoặc toàn bộ
 	def is_byte(self, token_id): return token_id <= 255
 	def is_marktone(self, token_id): return 256 <= token_id and token_id <= 273
-	def is_sym(self, token_id): return 274 <= token_id and token_id <= 2807 # âm tiết không dấu tanh
+	def is_sym(self, token_id): return 276 <= token_id and token_id <= 2944 # âm tiết không dấu thanh
 	def vocab_size(self): return 2944
 
 	# Biến đổi sym_id + marktone_id thành utf-8 string: VD: 274 + 258 => "à"
@@ -43,20 +43,18 @@ class Symato:
 			else:
 				token = None
 				if self.is_sym(tid):
-					mtid = tids[i + 1] if i <= n else None
+					mtid = tids[i + 1] if i < n else 0
 					if self.is_marktone(mtid):
 						token = self.to_utf8(tid, mtid)
 						i += 1
-				else:
-					token = self.decode(tid)
+					if self.is_sym(prev_tid): str += " " # thêm space giữa 2 syllables
+				if token is None: token = self.decode(tid)
 
 				if cap_id != None:
 					if self.is_sym_capitalized(cap_id): token = token.upper()
 					else: token = token[0].upper() + token[1:]
 					cap_id = None
 				
-				if self.is_sym(tid) and self.is_sym(prev_tid):
-					str += " " # thêm space giữa 2 syllables
 				str += token
 				prev_tid = tid
 
@@ -83,7 +81,10 @@ class Symato:
 
 	# Biến token id (tid) thành token
 	def decode(self, tid):
-		return self.itos[tid] if tid > 255 else chr(tid)
+		if isinstance(tid, int):
+			return self.itos[tid] if tid > 255 else chr(tid)
+		else:
+			return " ".join([ self.itos[i] if i > 255 else chr(i) for i in tid ])
 
 	# Biến text đầu vào thành token ids (tids)
 	def encode(self, a, maxx=None, rev=False):
@@ -157,6 +158,7 @@ symato = Symato()
 text = "a| ^a|f  ^^a|s"
 tids = symato.encode(text)
 assert tids == [276, 256, 274, 276, 258, 32, 32, 275, 276, 257]
+# print(tids, symato.tids_to_utf8(tids))
 assert symato.tids_to_utf8(tids) == "a À  Á"
 tids = symato.encode(text, rev=True)
 assert tids == [275, 276, 257, 32, 32, 274, 276, 258, 276, 256]
