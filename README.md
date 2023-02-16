@@ -185,3 +185,5 @@ Note: train 20 epochs trên cùng dataset, phobert tknz 48m params loss 0.14, sy
 ## Không đủ dữ liệu tiếng Việt để huấn luyện?
 
 ![](docs/files/gpt-00.jpg)
+
+Note: Dùng dịch Việt -> Anh -> Việt hoặc Việt -> Anh -> Đức -> Việt để "gây nhiễu" câu tiếng Việt chuẩn. Sau đó huấn luyện mô hình khôi phục lại câu chuẩn từ câu nhiễu. Và dùng nó như một bộ hậu xử lý cho dữ liệu đc dịch từ Anh sang Việt.
