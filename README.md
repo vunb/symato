@@ -14,53 +14,18 @@
   - [x] __Tăng context length 2x => loss giảm 1/2 trong 10 epochs đầu__
 
 ## Thử nghiệm với dữ liệu đủ lớn
+- [ ] Thu thập và xử lý dữ liệu: [vi project](https://github.com/telexyz/vi)
 
-- [ ] 1/ Sưu tầm "dữ liệu" đủ lớn, đủ đa dạng (ngoài tin tức, các dạng khác rất ít)
-  - [x] Nguồn
-    - Lọc từ https://github.com/CarperAI/pilev2 ?
-    - https://data.statmt.org/cc-100/vi.txt.xz (166G 1 file text, không phân chia theo văn bản)
-    - https://huggingface.co/datasets?language=language:vi
-    - https://huggingface.co/datasets?search=viet
-    - https://www.kaggle.com/datasets?tags=17046-Vietnamese
-  - [ ] Tin tức (quá dư)
-    - [ ] Cần phân loại theo categories (tin tức, khoa học, kiến thức, xã hội, luật pháp ...) và cân đối lại
-    - https://huggingface.co/datasets/bigscience-data/roots_vi_binhvq_news_corpus (20GB)
-    - https://huggingface.co/datasets/truongpdd/vietnews-datase (34GB)
-    - https://www.kaggle.com/datasets/nekonekonyan/vietnamesenewspapers (70GB gồm cả ảnh)
-  - [x] Truyện, thơ (1.1GB)
-    - https://huggingface.co/datasets/truongpdd/vietnamese_story (480MB)
-    - https://huggingface.co/datasets/truongpdd/vietnamese_poetry_story (538MB)
-    - https://huggingface.co/datasets/bigscience-data/roots_vi_vietnamese_poetry (57MB)
-    - https://huggingface.co/datasets/truongpdd/vietnamese_poetry (64MB)
-    - https://huggingface.co/datasets/truongpdd/luc-bat (33MB)
-  - [x] Wikipedia (1GB nén)
-    - https://dumps.wikimedia.org/viwiki (1GB nén, download trực tiếp)
-    - https://huggingface.co/datasets/truongpdd/viwiki-dummy (240MB)
-    - https://huggingface.co/datasets/bigscience-data/roots_vi_wikipedia (257MB)
-  - [ ] Sách
-    - ...
-  - [ ] Văn bản chính quy
-    - ...
-  - [ ] Khác?
-    - Diễn đàn
-    - Mạng xã hội
-    - Public chat room
-    - ...
-
-- [ ] Làm tốt dữ liệu
-  - loại bỏ dữ liệu kém (lọc theo tỉ lệ âm tiết, chất lượng âm tiết)
-  - dedup (minhash, simhash)
-  - data selection https://github.com/p-lambda/dsir
-  - Cân bằng giữa các loại dữ liệu
-
-- [ ] 3/ Build & train mô hình có độ lớn phù hợp với dữ liệu sau khi đã lọc và cân bằng
+- [ ] Train mô hình có độ lớn phù hợp với dữ liệu sau khi đã lọc và cân bằng
   - Xây dựng bộ tknz symato+ với vocab_size tùy ý
   - Thử nghiệm với nhiều vocab_size (16k, 32k, 64k)
-  - Thử nghiệm với nhiều params size (từ vài chục triệu cho tới vài tỉ tham số)
+  - Thử nghiệm với nhiều params size (từ vài trăm triệu cho tới vài tỉ tham số)
 
 ## Low-level
 - [ ] Tích hợp bộ phân tích ngữ âm từ zig vào python để có thể tknz trực tiếp từ Python code
 - [ ] Viết lại inference engine bằng zig để tăng tốc tối đa
+
+- - -
 
 https://user-images.githubusercontent.com/8133/216773986-3d26d73a-9206-45b1-ae8f-d5d8fdb01199.mp4
 
