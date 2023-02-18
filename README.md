@@ -1,3 +1,5 @@
+Tham gia cộng đồng symato tại https://discord.gg/53XmEbx7
+
 # TODOs
 
 ## Thử nghiệm với dữ liệu nhỏ (DONE)
@@ -14,7 +16,7 @@
   - [x] __Tăng context length 2x => loss giảm 1/2 trong 10 epochs đầu__
 
 ## Thử nghiệm với dữ liệu đủ lớn
-- [ ] Thu thập và xử lý dữ liệu: [vi project](https://github.com/telexyz/vi)
+- [ ] Thu thập và xử lý dữ liệu: [xem vi project](https://github.com/telexyz/vi)
 
 - [ ] Train mô hình có độ lớn phù hợp với dữ liệu sau khi đã lọc và cân bằng
   - Xây dựng bộ tknz symato+ với vocab_size tùy ý
