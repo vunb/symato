@@ -1,4 +1,4 @@
-Tham gia cộng đồng symato tại https://discord.gg/53XmEbx7
+Tham gia thảo luận tại https://discord.gg/53XmEbx7
 
 # TODOs
 
