@@ -43,7 +43,8 @@ class train_callback(pl.Callback):
 
         for param_group in trainer.optimizers[0].param_groups:
             if args.layerwise_lr > 0:
-                param_group["lr"] = lr * param_group["my_lr_scale"]
+                # param_group["lr"] = lr * param_group["my_lr_scale"]
+                param_group["lr"] = lr 
                 # print(param_group["lr"], param_group["my_lr_scale"])
             else:
                 param_group["lr"] = lr
