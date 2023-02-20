@@ -10,7 +10,8 @@ import pytorch_lightning as pl
 from pytorch_lightning.utilities import rank_zero_info, rank_zero_only
 from pytorch_lightning.strategies import DeepSpeedStrategy
 import deepspeed
-from deepspeed.ops.adam import DeepSpeedCPUAdam, FusedAdam
+# from deepspeed.ops.adam import DeepSpeedCPUAdam, FusedAdam
+from opt import Lion
 
 
 def __nop(ob): return ob
@@ -318,34 +319,47 @@ class RWKV(pl.LightningModule):
 
             param_dict = {n: p for n, p in self.named_parameters()}
             if args.my_pile_stage == 2:
+                # optim_groups = [
+                #     {"params": [param_dict[n] for n in lr_1x], "weight_decay": 0.0, "my_lr_scale": 1.0},
+                #     {"params": [param_dict[n] for n in lr_2x], "weight_decay": 0.0, "my_lr_scale": 5.0},# test: 2e-3 / args.lr_init},
+                #     {"params": [param_dict[n] for n in lr_3x], "weight_decay": 0.0, "my_lr_scale": 5.0},# test: 3e-3 / args.lr_init},
+                # ]
                 optim_groups = [
-                    {"params": [param_dict[n] for n in lr_1x], "weight_decay": 0.0, "my_lr_scale": 1.0},
-                    {"params": [param_dict[n] for n in lr_2x], "weight_decay": 0.0, "my_lr_scale": 5.0},# test: 2e-3 / args.lr_init},
-                    {"params": [param_dict[n] for n in lr_3x], "weight_decay": 0.0, "my_lr_scale": 5.0},# test: 3e-3 / args.lr_init},
+                    {"params": [param_dict[n] for n in lr_1x]},
+                    {"params": [param_dict[n] for n in lr_2x]},# test: 2e-3 / args.lr_init},
+                    {"params": [param_dict[n] for n in lr_3x]},# test: 3e-3 / args.lr_init},
                 ]
             else:
+                # optim_groups = [
+                #     {"params": [param_dict[n] for n in lr_1x], "weight_decay": 0.0, "my_lr_scale": 1.0},
+                #     {"params": [param_dict[n] for n in lr_2x], "weight_decay": 0.0, "my_lr_scale": 2.0},
+                #     {"params": [param_dict[n] for n in lr_3x], "weight_decay": 0.0, "my_lr_scale": 3.0},
+                # ]
                 optim_groups = [
-                    {"params": [param_dict[n] for n in lr_1x], "weight_decay": 0.0, "my_lr_scale": 1.0},
-                    {"params": [param_dict[n] for n in lr_2x], "weight_decay": 0.0, "my_lr_scale": 2.0},
-                    {"params": [param_dict[n] for n in lr_3x], "weight_decay": 0.0, "my_lr_scale": 3.0},
+                    {"params": [param_dict[n] for n in lr_1x]},
+                    {"params": [param_dict[n] for n in lr_2x]},# test: 2e-3 / args.lr_init},
+                    {"params": [param_dict[n] for n in lr_3x]},# test: 3e-3 / args.lr_init},
                 ]
         else:
+            # optim_groups = [
+            #     {"params": [p for n, p in self.named_parameters()], "weight_decay": 0.0},
+            # ]
             optim_groups = [
-                {"params": [p for n, p in self.named_parameters()], "weight_decay": 0.0},
+                {"params": [p for n, p in self.named_parameters()]},
             ]
 
-        if self.deepspeed_offload:
-            return DeepSpeedCPUAdam(optim_groups, lr=self.args.lr_init, betas=self.args.betas, eps=self.args.adam_eps, bias_correction=True, adamw_mode=False, weight_decay=0, amsgrad=False)
-        return FusedAdam(optim_groups, lr=self.args.lr_init, betas=self.args.betas, eps=self.args.adam_eps, bias_correction=True, adam_w_mode=False, weight_decay=0, amsgrad=False)
+        # if self.deepspeed_offload:
+        #     return DeepSpeedCPUAdam(optim_groups, lr=self.args.lr_init, betas=self.args.betas, eps=self.args.adam_eps, bias_correction=True, adamw_mode=False, weight_decay=0, amsgrad=False)
+        # return FusedAdam(optim_groups, lr=self.args.lr_init, betas=self.args.betas, eps=self.args.adam_eps, bias_correction=True, adam_w_mode=False, weight_decay=0, amsgrad=False)
+        return Lion(optim_groups, lr=self.args.lr_init, betas=self.args.betas, weight_decay=0)
 
-
-    @property
-    def deepspeed_offload(self) -> bool:
-        strategy = self.trainer.strategy
-        if isinstance(strategy, DeepSpeedStrategy):
-            cfg = strategy.config["zero_optimization"]
-            return cfg.get("offload_optimizer") or cfg.get("offload_param")
-        return False
+    # @property
+    # def deepspeed_offload(self) -> bool:
+    #     strategy = self.trainer.strategy
+    #     if isinstance(strategy, DeepSpeedStrategy):
+    #         cfg = strategy.config["zero_optimization"]
+    #         return cfg.get("offload_optimizer") or cfg.get("offload_param")
+    #     return False
 
 
     def forward(self, idx):
