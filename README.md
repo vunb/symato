@@ -23,9 +23,15 @@ Tham gia thảo luận tại https://discord.gg/53XmEbx7
   - Thử nghiệm với nhiều vocab_size (16k, 32k, 64k)
   - Thử nghiệm với nhiều params size (từ vài trăm triệu cho tới vài tỉ tham số)
 
+## Tối đa hóa training (tiết kiệm bộ nhớ và tính toán)
+- [ ] Fused kernel cho channel-mixing (có thể dùng Triton)
+- [ ] Cải tiến và fused kernel cho tiny-attn?
+- [ ] Loại bỏ các rẽ nhánh không cần thiết của các options thử nghiệm
+- [ ] Thử Torch 2.0 compile để tăng tốc
+
 ## Low-level
 - [ ] Tích hợp bộ phân tích ngữ âm từ zig vào python để có thể tknz trực tiếp từ Python code
-- [ ] Viết lại inference engine bằng zig để tăng tốc tối đa
+- [ ] Viết lại inference engine bằng zig
 
 - - -
 
