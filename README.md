@@ -25,9 +25,9 @@ Tham gia thảo luận tại https://discord.gg/53XmEbx7
 
 ## Tối đa hóa training (tiết kiệm bộ nhớ và tính toán)
 - [ ] Fused kernel cho channel-mixing (có thể dùng Triton)
-- [ ] Cải tiến và fused kernel cho tiny-attn?
-- [ ] Loại bỏ các rẽ nhánh không cần thiết của các options thử nghiệm
-- [ ] Thử Torch 2.0 compile để tăng tốc
+- [ ] Fused kernel cho tiny-attn?
+- [x] Loại bỏ các rẽ nhánh không cần thiết của các options thử nghiệm
+- [x] Thử Torch 2.0 compile để tăng tốc (không tương thích)
 
 ## Low-level
 - [ ] Tích hợp bộ phân tích ngữ âm từ zig vào python để có thể tknz trực tiếp từ Python code
