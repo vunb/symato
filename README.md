@@ -23,12 +23,6 @@ Tham gia thảo luận tại https://discord.gg/53XmEbx7
   - Thử nghiệm với nhiều vocab_size (16k, 32k, 64k)
   - Thử nghiệm với nhiều params size (từ vài trăm triệu cho tới vài tỉ tham số)
 
-## Tối đa hóa training (tiết kiệm bộ nhớ và tính toán)
-- [ ] Fused kernel cho channel-mixing (có thể dùng Triton)
-- [ ] Fused kernel cho tiny-attn?
-- [x] Loại bỏ các rẽ nhánh không cần thiết của các options thử nghiệm
-- [x] Thử Torch 2.0 compile để tăng tốc (không tương thích)
-
 ## Low-level
 - [ ] Tích hợp bộ phân tích ngữ âm từ zig vào python để có thể tknz trực tiếp từ Python code
 - [ ] Viết lại inference engine bằng zig
@@ -59,9 +53,6 @@ __Đây nơi thiết lập các thử nghiệm xây dựng [mô hình văn bản
 - Bao nhiêu lượng dữ liệu là đủ để pre-train tiếp một mô hình đang có cho một ngôn ngữ lạ?
 
 - Với một lượng dữ liệu nhất định, của một lĩnh vực cụ thể thì nên tokenization như thế nào? Bao nhiêu params / training bao lâu là đủ?
-
-- Làm sao để tăng khả năng sử dụng tối đa sức mạnh phần cứng đang có để huấn luyện mô hình?
-  - Sử dụng [2:4 spare matrix](https://timdettmers.com/2023/01/16/which-gpu-for-deep-learning/#Sparse_Network_Training) (có thể coi đây là Dropout với p = 0.5)
 
 - - -
 
