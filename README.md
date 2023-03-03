@@ -1,4 +1,4 @@
-Tham gia thảo luận tại https://discord.gg/53XmEbx7
+Tham gia thảo luận tại https://discord.gg/NuYwhH6Kbb
 
 # TODOs
 
