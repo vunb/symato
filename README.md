@@ -16,12 +16,12 @@ Tham gia thảo luận tại https://discord.gg/NuYwhH6Kbb
   - [x] __Tăng context length 2x => loss giảm 1/2 trong 10 epochs đầu__
 
 ## Thử nghiệm với dữ liệu đủ lớn
-- [ ] Thu thập và xử lý dữ liệu: [xem vi project](https://github.com/telexyz/vi)
+- [x] Thu thập và xử lý 100G dữ liệu: [xem vi project](https://github.com/telexyz/vi)
 
 - [ ] Train mô hình có độ lớn phù hợp với dữ liệu sau khi đã lọc và cân bằng
-  - Xây dựng bộ tknz symato+ với vocab_size tùy ý
-  - Thử nghiệm với nhiều vocab_size (16k, 32k, 64k)
-  - Thử nghiệm với nhiều params size (từ vài trăm triệu cho tới vài tỉ tham số)
+  - [ ] Xây dựng symato_16k (vs sentencepiece 16k)
+  - [ ] Xây dựng cách lấy mẫu để đảm bảo mỗi token chỉ đc train 1 lần (tiết kiệm computing)
+  - [ ] Huấn luyện mô hình 1.2 tỉ tham số trên 36G dữ liệu chọn lọc
 
 ## Low-level
 - [ ] Tích hợp bộ phân tích ngữ âm từ zig vào python để có thể tknz trực tiếp từ Python code
