@@ -19,9 +19,9 @@ Tham gia thảo luận tại https://discord.gg/NuYwhH6Kbb
 - [x] Thu thập và xử lý 100G dữ liệu: [xem vi project](https://github.com/telexyz/vi)
 
 - [ ] Train mô hình có độ lớn phù hợp với dữ liệu sau khi đã lọc và cân bằng
-  - [ ] Xây dựng symato_16k (vs sentencepiece 16k)
-  - [ ] Xây dựng cách lấy mẫu để đảm bảo mỗi token chỉ đc train 1 lần (tiết kiệm computing)
-  - [ ] Huấn luyện mô hình 1.2 tỉ tham số trên 36G dữ liệu chọn lọc
+  - [x] Xây dựng symato_16k (vs sentencepiece 16k)
+  - [x] Xây dựng cách lấy mẫu để đảm bảo mỗi token chỉ đc train 1 lần (tiết kiệm computing)
+  - [ ] Huấn luyện mô hình 2.5 tỉ tham số trên 36G dữ liệu chọn lọc
 
 ## Low-level
 - [ ] Tích hợp bộ phân tích ngữ âm từ zig vào python để có thể tknz trực tiếp từ Python code
