@@ -90,7 +90,7 @@ Tknz là cách bẻ text thành các đơn vị thông tin để đưa vào xử
 ![](docs/files/symato-01.jpg)
 Âm tiết tiếng Việt chiếm ~80% trong text corpus, nó chính là đặc trưng của cả tiếng nói và chữ viết Việt. Dùng âm tiết làm đơn vị là hợp lý. Tiếng Việt viết ~16K âm tiết có ý nghĩa, 12K âm tiết thường dùng, khi phân tách ra thành cách viết không dấu (sym) + dấu (mark) và thanh điệu (tone) thì số lượng đơn vị giảm đi đáng kể. Chỉ còn khoảng 2500 sym và 18 marktone. Như vậy với 2560 tokens là có thể cover hết được sym + marktone và còn thêm các token khác để biểu thị viết hoa vs viết thường...
 
-__Bộ vocab 2816 tokens__ (2560 tokens để encode thuần tiếng Việt + 256 tokens tương đương với 256 bytes để biểu diễn mọi thứ còn lại) là có thể tokenization hiệu quả mọi corpus có hàm lượng tiếng Việt lớn. Nhắc lại ví dụ trên khi chatgpt tokenize tiếng Việt dưới dạng chars và bytes để encode 80% corpus tiếng Việt mà vẫn cho ra kết quả ấn tượng, thì việc dùng 256 bytes để encode 20% phần còn lại chắc chắn sẽ hoạt động tốt.
+__Bộ vocab 3k tokens__ (khoảng 2800 tokens để encode thuần tiếng Việt + 256 tokens tương đương với 256 bytes để biểu diễn mọi thứ còn lại) là có thể tokenization hiệu quả mọi corpus có hàm lượng tiếng Việt lớn. Nhắc lại ví dụ trên khi chatgpt tokenize tiếng Việt dưới dạng chars và bytes để encode 80% corpus tiếng Việt mà vẫn cho ra kết quả ấn tượng, thì việc dùng 256 bytes để encode 20% phần còn lại chắc chắn sẽ hoạt động tốt.
 
 ### Tại sao không dùng bộ vocab lớn hơn?
 Hoàn toàn có thể mở rộng vocabs lên nữa khi cần, nhưng việc giới hạn bộ vocabs nhỏ sẽ giúp tiết kiệm số lượng tham số và làm tăng tốc độ của mô hình. Tôi tin rằng bộ vocab như vậy là đủ tốt cho những tài nguyên tiếng Việt hiện có (xem giải thích ở trên và thêm thống kê bên dưới).
@@ -104,11 +104,23 @@ Hoàn toàn có thể mở rộng bộ vocab bằng cách giữ nguyên symato v
 
 ### Tôi chưa hiểu bạn giải thích rõ hơn được không?
 Tóm lại symato có 3 bộ vocabs:
-1. `symato-2816` gồm 256 bytes, 18 marktones, 2534 syms (âm tiết viết không dấu viết thường) và các tokens bổ trợ
-2. `symato-16384` gồm bộ từ vựng `symato-2816` cộng thêm 13568 âm tiết tiếng Việt có dấu viết xuất hiện thường xuyên nhất trong dữ liệu huấn luyện
-3. `symato-32768` gồm bộ từ vựng `symato-16384` cộng thêm 16384 các cặp âm tiết tiếng Việt có dấu xuất hiện thường xuyên nhất trong dữ liệu huấn luyện
+1. `symato-3k` gồm 256 bytes, 18 marktones, khoảng 2800 syms (âm tiết viết không dấu viết thường) và các tokens bổ trợ
+2. `symato-16k` gồm bộ từ vựng `symato-3k` cộng thêm khoảng 13k đơn âm tiết và đôi âm tiết tiếng Việt có dấu viết xuất hiện thường xuyên nhất trong dữ liệu huấn luyện (unigram và bigram)
+3. `symato-32k` gồm bộ từ vựng `symato-16k` cộng thêm các bigrams và trigrams ... 
+4. `symato+` gồm symato-3k,16k,32k và các tokens khác xây dựng bằng BPE để cover các dữ liệu phi âm tiết tốt hơn.
 
-4. `symato-2816+` gồm symato-2816 và các tokens khác xây dựng bằng BPE, độ lớn vocab tùy ý. Tối ưu cho dataset đc huấn luyện.
+Ví dụ về bigrams trong symato-16k xây dựng cho dataset văn bản luật.
+```
+ Quy hoạch hệ_thống quảng_cáo trực_quan ngoài_trời, bảo_đảm sự thống_nhất, đồng_bộ, tạo cơ_sở pháp_lý thuận_lợi cho các đơn_vị, doanh_nghiệp, các tổ_chức, cá_nhân thực_hiện tốt nhiệm_vụ tuyên_truyền, quảng_cáo ngoài_trời theo đúng quy_định, góp_phần phục_vụ đắc_lực công_tác tuyên_truyền các nhiệm_vụ chính_trị của tỉnh; góp_phần thúc_đẩy phát_triển sản_xuất, lưu_thông hàng_hóa, phục_vụ dân_sinh; đồng_thời tạo cảnh_quan đẹp cho các đô_thị và quảng_bá phát_triển du_lịch.
+ Xác định cụ_thể vị_trí đất_đai, không_gian sử_dụng, quy_mô, hình_thức và nội_dung của các cụm bảng quảng_cáo trên các tuyến quốc_lộ, vị_trí treo băng zÃ´n, trạm bảng tin, quảng_cáo rao vặt và các hình_thức quảng_cáo ngoài_trời khác; trên_cơ sở đó trình cấp có thẩm_quyền giao quyền sử_dụng đất, hoặc cho_thuê đất sử_dụng lâu_dài, phù_hợp với quy_hoạch chung, quy_hoạch vùng, lĩnh_vực và quy_mô phát_triển đô_thị; không phá_vỡ kiến_trúc cảnh_quan và không_gian đô_thị, đáp_ứng nhu_cầu giao_lưu, hội_nhập và phát_triển; tiếp_cận và áp_dụng công_nghệ quảng_cáo tiên_tiến hiện_đại, tương_xứng và phù_hợp với thực_tiễn phát_triển kinh_tế xã_hội của tỉnh, phù_hợp với đặc_điểm dân_cư, phong_tục, tập_quán của từng địa_phương.
+ 2. Mục tiêu cụ_thể:
+ 2.1. Xây dựng hệ_thống bảng cổ_động trực_quan: 
+ Giai đoạn 2011 2015:
+ Rà soát hệ_thống bảng cổ_động trực_quan, băng zÃ´n, trạm bảng tin, bảng hộp đèn trên cột điện và dải phân_cách các hình_thức quảng_cáo ngoài_trời khác, phục_vụ công_tác tuyên_truyền đã có ở các trung_tâm ( thành_phố, thị_xã, thị_trấn, thị_tứ...) để điều_chỉnh cho phù_hợp với Quy hoạch.
+ Xây dựng mới hệ_thống bảng cổ_động trực_quan ở trung_tâm thành_phố Thanh_hóa dọc Đại lộ Lê Lợi, đường Quốc lộ 1 A phần đi_qua thành_phố Thanh_hóa, Khu đô_thị mới phía Đông, phía Tây và từ cửa ô của thành_phố đi trung_tâm các huyện, thị_xã.
+ Xây dựng hệ_thống bảng hộp đèn trên dải phân_cách và trên cột điện tại trục đường Đại lộ Lê Lợi và tuyến Quốc lộ 1 A đi_qua thành_phố Thanh_hóa.
+ Xây dựng các bảng cổ_động trực_quan, trạm bảng tin, theo các đường chính của cấp xã, phường, thôn, khu dân_cư.
+```
 
 ### vocab_size ảnh hưởng tới mô hình như thế nào?
 
