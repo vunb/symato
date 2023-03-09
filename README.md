@@ -106,7 +106,7 @@ Hoàn toàn có thể mở rộng vocabs lên nữa khi cần, nhưng việc gi�
 Hoàn toàn có thể mở rộng bộ vocab bằng cách giữ nguyên symato và cho thêm vào các token dài hơn ví dụ 16k âm tiết chẳng hạn. Khi mở rộng như vậy mỗi câu tiếng Việt có thể có nhiều cách tokenization ta có thể huấn luyện trên nhiều cách tknz như vậy. Khi decode tùy từng tác vụ ta ưu tiên các cách tknz khác nhau. Ví dụ thêm dấu thanh thì dùng symato, còn sinh câu thì ưu tiên dùng tokens dài (âm tiết, từ ...)
 
 ### Tôi chưa hiểu bạn giải thích rõ hơn được không?
-Tóm lại symato có 3 bộ vocabs:
+Tóm lại symato có 3 bộ vocabs chính và các bản mở rộng của chúng:
 1. `symato-3k` gồm 256 bytes, 18 marktones, khoảng 2800 syms (âm tiết viết không dấu viết thường) và các tokens bổ trợ
 2. `symato-16k` gồm bộ từ vựng `symato-3k` cộng thêm khoảng 13k đơn âm tiết và đôi âm tiết tiếng Việt có dấu viết xuất hiện thường xuyên nhất trong dữ liệu huấn luyện (unigram và bigram)
 3. `symato-32k` gồm bộ từ vựng `symato-16k` cộng thêm các bigrams và trigrams ... 
