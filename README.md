@@ -4,6 +4,9 @@ Tham gia thảo luận tại https://discord.gg/NuYwhH6Kbb
 
 ## Thử nghiệm với dữ liệu nhỏ (DONE)
 - [x] Tìm cách tokenize hợp với tiếng việt (xem [symato](#symato))
+  1. Âm tiết là đặc trưng chính của tiếng Việt và là đơn vị hợp lý để sử dụng trong việc phân tích ngôn ngữ.
+  2. Việc phân tách âm tiết thành các đơn vị như sym, mark và tone giúp giảm số lượng đơn vị cần sử dụng.
+  3. Bộ vocab 3k tokens là đủ để encode hiệu quả mọi corpus có hàm lượng tiếng Việt lớn, và việc sử dụng 256 bytes để encode phần còn lại cũng sẽ hoạt động tốt.
 - [x] Đọc hiểu rwkv ([xem rwkv.md](./docs/rwkv.md) hoặc [bản rút gọn](./docs/rwkv-illustrated.md))
 - [x] Viết lại rwkv inference engine [~200 loc in python](https://github.com/telexyz/symato/blob/1854f26d097ea616f8f76c054d0357f739d7c92c/model_run_f32.py)
 - [x] Đọc hiểu và rút gọn [code training](./rwkv-v4neo)
