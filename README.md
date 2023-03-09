@@ -18,7 +18,7 @@ Tham gia thảo luận tại https://discord.gg/NuYwhH6Kbb
   - [x] Cải tiến Symato tknz giảm token space giữa 2 âm tiết
   - [x] __Tăng context length 2x => loss giảm 1/2 trong 10 epochs đầu__
 
-## Thử nghiệm với dữ liệu đủ lớn
+## Thử nghiệm với dữ liệu đủ lớn (DOING)
 - [x] Thu thập và xử lý 100G dữ liệu: [xem vi project](https://github.com/telexyz/vi)
 
 - [ ] Train mô hình có độ lớn phù hợp với dữ liệu sau khi đã lọc và cân bằng
