@@ -20,10 +20,9 @@ Tham gia thảo luận tại https://discord.gg/NuYwhH6Kbb
 
 ## Thử nghiệm với dữ liệu đủ lớn (DOING)
 - [x] Thu thập và xử lý 100G dữ liệu: [xem vi project](https://github.com/telexyz/vi)
-
 - [ ] Train mô hình có độ lớn phù hợp với dữ liệu sau khi đã lọc và cân bằng
   - [x] Xây dựng symato_16k (vs sentencepiece 16k)
-  - [x] Xây dựng cách lấy mẫu để đảm bảo mỗi token chỉ đc train 1 lần (tiết kiệm computing)
+  - [x] Chứng minh độ hiệu quả của symato_16k bằng thực nghiệm (xem [báo cáo kỹ thuật](docs.google.com/document/d/1VQz-4Hy7s6h0dtzbFyL3d4vcOkDd5LH0JAoMlYF807A/edit))
   - [ ] Huấn luyện mô hình 2.5 tỉ tham số trên 36G dữ liệu chọn lọc
 
 ## Low-level
