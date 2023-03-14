@@ -1,7 +1,7 @@
 TODOs
 - [x] Thử Lion optimizer (không tốt)
 - [x] Tại sao bản viết lại chậm 1.5x so với bản gốc? (cần set trainer về "bf16")
-- [x] Sử dụng gradient checkpoint để tiết kiệm vram (rất tốt cho mô hình 200m params)
+- [x] Sử dụng gradient checkpoint để tiết kiệm vram (rất tốt cho mô hình lớn)
 - [ ] Fused kernel cho L2Wrap
 - Fused kernels cho channel-mixing (có thể dùng Triton)
   - `sigmoid(receptance @ xr)` dùng trong cả att và fnn
