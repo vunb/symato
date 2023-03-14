@@ -9,7 +9,7 @@ TODOs
   - Note: nên chờ tính năng tự động fused của torch.compile 2.0 => không cần mất time để viết
 - [ ] 8-bit training https://github.com/TimDettmers/bitsandbytes
 
-# Thu gọn [rwkv-lm](https://github.com/BlinkDL/RWKV-LM) còn ~500 loc
+# Thu gọn [rwkv-lm](https://github.com/BlinkDL/RWKV-LM) còn ~600 dòng code
 - Code đơn giản và dễ hiểu nhất có thể
 - Comments đủ rõ ràng để người mới có thể hiểu
 - Tối đa hóa năng lực tính toán (xem TODOs trên)
