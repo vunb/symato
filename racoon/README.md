@@ -15,10 +15,10 @@ TODOs
 - Tối đa hóa năng lực tính toán (xem TODOs trên)
 
 ### Mã nguồn
-- `model.py`: mô hình ngôn ngữ RWKV, chỉ hỗ trợ kiểu dữ liệu bf16 để tiết kiệm bộ nhớ và sử dụng được nhân cuda tăng tốc phép nhân ma trận. Sử dụng lightning trainer để support nhiều GPUs, và deepspeed fused adam, dùng deepspeed gradient checkpoint để tiêt kiệm vram (nhằm tăng batch_size) khi cần
+- `model.py`: mô hình ngôn ngữ RWKV, chỉ hỗ trợ kiểu dữ liệu bf16 để tiết kiệm bộ nhớ và sử dụng được nhân cuda tăng tốc phép nhân ma trận. Sử dụng lightning trainer support nhiều GPUs, và deepspeed fused adam, dùng deepspeed gradient checkpoint để tiêt kiệm vram (nhằm tăng batch_size) khi cần
 
 - `dataset.py`: nạp dữ liệu văn bản đã được tokenized và lưu dưới dạng nhị phân (binidx) để có thể nạp hàng trăm GB dữ liệu vào mô hình mà không tốn thời gian tiền xử lý và không tràn bộ nhớ, nhờ sử dụng memory mapped.
 
-- `train.py` toàn bộ kịch bản huấn luyện, sử dụng độ chính xác bf16 để tăng tốc và tiết kiệm vram
+- `train.py` toàn bộ kịch bản huấn luyện.
 
 - `wkv_cuda.cu`: nhân cuda để tăng tốc tính TimeMix (quan trọng)
