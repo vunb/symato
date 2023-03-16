@@ -26,9 +26,6 @@ Tham gia thảo luận tại https://discord.gg/NuYwhH6Kbb
 - [x] Release [racoon](./racoon) bản rút gọn RWKV-v4 để huấn luyện mô hình ngôn ngữ thuần Việt
 - [ ] Huấn luyện mô hình ngôn ngữ lớn 2.5 tỉ tham số trên khoảng 100G dữ liệu chọn lọc
 
-## Low-level
-- [ ] Tích hợp bộ phân tích ngữ âm từ zig vào python để có thể tknz trực tiếp từ Python code
-- [ ] Viết lại inference engine bằng zig
 
 - - -
 
@@ -36,6 +33,10 @@ https://user-images.githubusercontent.com/8133/216773986-3d26d73a-9206-45b1-ae8f
 
 ### Symato có thể làm hai việc một lúc, tự động thêm dấu thanh và sinh văn bản
 ![](./docs/files/symato.jpg)
+
+### Thử nghiệm làm chatbot
+https://user-images.githubusercontent.com/8133/225555655-7bf1e15c-ecdd-45da-a084-7cce1eef7b29.mp4
+
 
 - - -
 
