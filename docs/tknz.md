@@ -11,6 +11,10 @@ Bạn có thể nhận được một số kết quả không mong muốn nếu 
 
 i think they talked about this in the paper too (below paper)
 
+Giải thích **weighted avg** với 1 từ trong tknz mới, dùng cosine similarity để tìm các tokens **tương tự** trong old embeddings, rồi dùng weighted (similarity) avg để khởi tạo embedding của từ (token) mới đó.
+
+**Đơn giản hơn là chỉ add words trong dictionary của language mới vào vocab không dùng BPE nữa.**
+
 
 ## Initializing New Word Embeddings for Pretrained Language Models
 - https://nlp.stanford.edu/~johnhew/vocab-expansion.html
