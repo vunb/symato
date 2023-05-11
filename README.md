@@ -1,4 +1,5 @@
-Tham gia thảo luận tại https://discord.gg/NuYwhH6Kbb
+- Tham gia thảo luận tại https://discord.gg/NuYwhH6Kbb
+- Website chính thức https://www.symato.xyz/about-us
 
 # TODOs
 
@@ -37,6 +38,8 @@ https://user-images.githubusercontent.com/8133/216773986-3d26d73a-9206-45b1-ae8f
 ### Thử nghiệm làm chatbot
 https://user-images.githubusercontent.com/8133/225555655-7bf1e15c-ecdd-45da-a084-7cce1eef7b29.mp4
 
+### Chatbot đời thứ 5
+https://user-images.githubusercontent.com/8133/236672299-c4cf39c0-a7a0-44d8-b9be-c1b056b1df35.mp4
 
 - - -
 
