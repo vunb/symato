@@ -41,6 +41,8 @@ https://user-images.githubusercontent.com/8133/225555655-7bf1e15c-ecdd-45da-a084
 ### Chatbot đời thứ 5
 https://user-images.githubusercontent.com/8133/236672299-c4cf39c0-a7a0-44d8-b9be-c1b056b1df35.mp4
 
+https://github.com/telexyz/symato/assets/8133/d536b9ef-d7c6-4529-9640-b32d84e29373
+
 - - -
 
 > Symato là viết tắt của Symbol + Mark + Tone. Google translate sang tiếng Việt là "Đồng Cảm"
