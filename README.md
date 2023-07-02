@@ -10,7 +10,7 @@
   3. Bộ vocab 3k tokens là đủ để encode hiệu quả mọi corpus có hàm lượng tiếng Việt lớn, và việc sử dụng 256 bytes để encode phần còn lại cũng sẽ hoạt động tốt.
 - [x] Đọc hiểu rwkv ([xem rwkv.md](./docs/rwkv.md) hoặc [bản rút gọn](./docs/rwkv-illustrated.md))
 - [x] Viết lại rwkv inference engine [~200 loc in python](https://github.com/telexyz/symato/blob/1854f26d097ea616f8f76c054d0357f739d7c92c/model_run_f32.py)
-- [x] Đọc hiểu và rút gọn [code training](./rwkv-v4neo)
+- [x] Đọc hiểu và rút gọn [code training]([./rwkv-v4neo](https://github.com/telexyz/symato/tree/a8f19d4e24dea966f25e1deeb8338cd8d47b0297/rwkv-v4neo))
 - [x] rwkv-lm với dataset âm tiết tiếng Việt bất kỳ
   - [x] Thiết kế symato vocab
   - [x] Tạo mini dataset [vlc.xyz](https://raw.githubusercontent.com/telexyz/data/master/vlc.xyz) (16MB)
@@ -23,10 +23,9 @@
 - [x] Thu thập và xử lý 100G dữ liệu: [xem vi project](https://github.com/telexyz/vi)
 - [x] Train mô hình có độ lớn phù hợp với dữ liệu sau khi đã lọc và cân bằng
   - [x] Xây dựng symato_16k (vs sentencepiece 16k)
-  - [x] Chứng minh độ hiệu quả của symato_16k bằng thực nghiệm (xem [báo cáo kỹ thuật](https://docs.google.com/document/d/1VQz-4Hy7s6h0dtzbFyL3d4vcOkDd5LH0JAoMlYF807A/edit))
+  - [x] Độ hiệu quả của symato_16k (xem [báo cáo kỹ thuật](https://docs.google.com/document/d/1VQz-4Hy7s6h0dtzbFyL3d4vcOkDd5LH0JAoMlYF807A/edit))
 - [x] Release [racoon](./racoon) bản rút gọn RWKV-v4 để huấn luyện mô hình ngôn ngữ thuần Việt
 - [ ] Huấn luyện mô hình ngôn ngữ lớn 2.5 tỉ tham số trên khoảng 100G dữ liệu chọn lọc
-
 
 - - -
 
