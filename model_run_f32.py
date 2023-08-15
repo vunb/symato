@@ -169,10 +169,10 @@ args.n_layer = 6
 args.n_embd = 512
 from symato_2816 import Symato
 
-args.MODEL_NAME = "rwkv-v4neo/out/rwkv-25.pth"
-args.n_layer = 4
-args.n_embd = 320
-from symato_2944 import Symato
+# args.MODEL_NAME = "model/rwkv-2944-vlc-7m.pth"
+# args.n_layer = 4
+# args.n_embd = 320
+# from symato_2944 import Symato
 
 TOKENIZER = Symato()
 
